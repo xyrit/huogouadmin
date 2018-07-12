@@ -1,0 +1,86 @@
+{% extends '@app/views/base.html' %}
+
+{% block main %}
+<div>
+    {{ html.beginForm('', 'post', {'class':'am-form am-form-horizontal', 'id':'submitForm', 'enctype':"multipart/form-data"}) | raw }}
+    <table cellpadding="5">
+        <table cellpadding="5">
+            <tr>
+                <td>站点</td>
+                <td>
+                    <select  name="from">
+                        <option value="1" >伙购网</option>
+                        <option value="2" >滴滴夺宝</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>通知标题:</td>
+                <td><input class="easyui-textbox" type="text" name="title" data-options="required:true"></td>
+            </tr>
+            <tr>
+                <td>通知内容:</td>
+                <td><input class="easyui-textbox" type="text" name="content"  ></td>
+            </tr>
+            <tr>
+                <td>后续动作:</td>
+                <td>
+                    <select name="msg_do" id="msg_do">
+                        <option value="">启动app</option>
+                        <option value="product">打开商品页面</option>
+                        <option value="search">打开搜索页</option>
+                        <option value="app">下载app</option>
+                        <option value="url">打开链接</option>
+                    </select>
+                </td>
+            </tr>
+            <tr id="productId" style="display: none;">
+                <td>商品ID:</td>
+                <td>
+                    <input type="text" name="productId">
+                </td>
+            </tr>
+            <tr>
+                <td>提醒方式:</td>
+                <td>
+                    <input type="checkbox" name="remindType[]" value="isRing" >通知响铃
+                    <input type="checkbox" name="remindType[]" value="isVibrate" >通知震动
+                    <input type="checkbox" name="remindType[]" value="isClearable" checked>是否可擦除
+                </td>
+            </tr>
+            <tr>
+                <td>目标平台:</td>
+                <td>
+                    <input type="checkbox" name="os[]" value="3" checked>IOS
+                    <input type="checkbox" name="os[]" value="4" checked>Android
+                </td>
+            </tr>
+        </table>
+    </table>
+    {{ html.endForm() | raw }}
+    <div style="padding:5px">
+        <a href="javascript:void(0)" class="easyui-linkbutton" onclick="submitForm()">提交</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+$(function() {
+    $('#msg_do').change(function() {
+        var msg_do = $(this).val();
+        if (msg_do=='product') {
+            $('#productId').show();
+        } else {
+
+            $('#productId').hide();
+        }
+    });
+});
+
+    function  submitForm()
+    {
+        $('#submitForm').submit();
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,249 @@
+{% extends '@app/views/base.html' %}
+
+{% block css %}
+<style>
+    td {
+        border: 1px solid #C1DAD7;
+        background: #fff;
+        font-size:11px;
+        padding: 6px 6px 6px 12px;
+        color: #4f6b72;
+    }
+    td label{background-color:#dddddd; width:100px;height: 35px; border-collapse: collapse;}
+    td .alt {
+        background: #F5FAFA;
+        color: #797268;
+    }
+    .box span{font-size: 12px;padding: 6px 6px 6px 12px;color: #4f6b72;}
+    .good{ border-collapse: collapse;}
+    .panel-body div{ padding: 10px 0;}
+
+</style>
+{% endblock %}
+
+{% block main %}
+<div title="Basic Window"  style="padding:5px;height:auto;" class="box">
+    <div style="padding: 10px 0;">
+        <span>订单状态：{{ detail.status }}</span>
+        <span>订单编号：{{ detail.id }}</span>
+        <span>订单生成时间：{{ detail.create_time|date('Y-m-d H:i:s') }}</span>
+    </div>
+
+    <table class="good">
+        <tr>
+            <td>商品图片</td>
+            <td>商品名称</td>
+            <td>活动类型</td>
+        </tr>
+
+        <tr>
+            <td><img src="{{ detail.picture }}" width="30" height="30"> </td>
+            <td>{{ detail.name }}</td>
+            <td>{{ detail.act_type }}</td>
+        </tr>
+    </table>
+</div>
+
+<div style="width:auto;height:auto;">
+
+    {% if(detail.status > 1) %}
+    <div title="备货信息" style="padding:10px" class="easyui-dialog" data-options="closed:true,modal:true" id="deliver">
+        <iframe id="deliver-info" frameborder="0" style="width: 400px;height: 400px;" scrolling="no"></iframe>
+    </div>
+    {% endif %}
+
+    {% if(detail.status > 2) %}
+    <div title="发货信息" style="padding:10px" class="easyui-dialog" data-options="closed:true,modal:true" id="send">
+        <iframe id="send-info" frameborder="0" style="width: 400px;height: 300px;"  scrolling="no"></iframe>
+    </div>
+    {% endif %}
+
+    <div title="备注" style="padding: 10px;font-size: 13px;">
+        <table class="good">
+            <tr>
+                <td>备注内容</td>
+                <td>备注人</td>
+                <td>备注时间</td>
+            </tr>
+            {% for remark in detail.remarkArr %}
+            <tr>
+                <td>{{ remark.op_content }}</td>
+                <td>{{person[remark.op_user]}} </td>
+                <td>{{remark.op_time}}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+
+{% if(detail.status >= 1) %}
+<div class="easyui-tabs" style="width:80%;height:auto;font-size: 14px;">
+    <div title="收货地址" style="padding:10px">
+
+        <div>收货人：{{ detail.ship_name }}</div>
+        <div>联系方式：{{ detail.ship_mobile }}</div>
+        <div>收货地址：{{ detail.ship_area }}{{ detail.ship_addr }}</div>
+        <div>配送时间：{{ detail.ship_time }}</div>
+        <div>备注信息：{{ detail.mark_text }}</div>
+        <div>提交时间：{{ detail.confirm_addr_time|date('Y-m-d H:i:s') }}</div>
+        <br />
+        {% if detail.status > 1 %}
+        <div>确认人：{{ person[deliverInfo.confirm_userid] }}</div>
+        <div>确认时间：{{ deliverInfo.confirm_time|date('Y-m-d H:i:s') }}</div>
+        {% endif %}
+    </div>
+
+    {% if(detail.status >= 3) %}
+    <div title="备货信息" style="padding:10px">
+        <div>
+            <div>发货方式：{{ deliverInfo.send }}</div>
+            <div>备货平台：{{ deliverInfo.platform }}</div>
+            <div>成本：{{ deliverInfo.price }}</div>
+            <div>第三方订单号：{{ deliverInfo.third_order }}</div>
+            <div>发票：{{ deliverInfo.bill }}</div>
+            <div>发票号：{{ deliverInfo.bill_num }}</div>
+            <div>规格：{{ deliverInfo.standard }}</div>
+            <div>备注：{{ deliverInfo.mark_text }}</div>
+            <br />
+            <div>备货人：{{ person[deliverInfo.prepare_userid] }}</div>
+            <div>备货时间：{{ deliverInfo.prepare_time|date('Y-m-d H:i:s') }}</div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if(detail.status >= 4) %}
+    <div title="发货信息" style="padding:10px">
+        <div>
+            <div>快递公司：{{ deliverInfo.deliver_company }}</div>
+            <div>快递订单号：{{ deliverInfo.deliver_order }}</div>
+            <div>快递费用：{{ deliverInfo.deliver_cost }}</div>
+            <br />
+            <div>发货人：{{ person[deliverInfo.prepare_userid] }}</div>
+            <div>发货时间：{{ deliverInfo.deliver_time|date('Y-m-d H:i:s') }}</div>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endif %}
+<br />
+
+{% if(detail.status == 2 and priv.prepare == 1) %}
+<a href="javascript:void(0)" class="easyui-linkbutton" data-id="all" id="deliver-show">备货</a>
+{% endif %}
+{% if(detail.status == 3 and priv.ship == 1) %}
+<a href="javascript:void(0)" class="easyui-linkbutton" data-id="all" id="send-show">发货</a>
+{% endif %}
+
+{% if(detail.status == 1 and priv.confirm == 1 and priv.refuse == 1) %}
+<a href="javascript:void(0)" class="easyui-linkbutton " data-id="all" id="confirm">确认</a>
+<a href="javascript:void(0)" class="easyui-linkbutton " data-id="all" onclick="refuse()">驳回</a>
+{% endif %}
+
+{% if(detail.status == 3 or detail.status==4 or detail.status==8) and priv.edit == 1 %}
+<a href="javascript:void(0)" class="easyui-linkbutton get-status" data-id="all" onclick="editOrder()">修改订单</a>
+{% endif %}
+
+<a href="javascript:void(0)" class="easyui-linkbutton" onclick="javascript:$('#dlg-remark').window('open');;">添加备注</a>
+
+<div id="dlg-buttons-remark" style="text-align:center;padding:5px">
+    <a class="easyui-linkbutton" iconCls="icon-ok" onclick="addRemark()">确定</a>
+    <a class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg-remark').dialog('close')">取消</a>
+</div>
+
+<div id="dlg-refuse" title="驳回理由" class="easyui-dialog" style="width:320px;height:auto;padding:10px 20px" data-options="closed:true,modal:true" buttons="#dlg-buttons-add">
+    <textarea data-options="required:true" class="easyui-textarea" rows="6" cols="34" id="fail"></textarea>
+</div>
+
+<div id="dlg-buttons-add" style="text-align:center;padding:5px">
+    <a class="easyui-linkbutton" iconCls="icon-ok" onclick="saveRefuse()">确定</a>
+    <a class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg-refuse').dialog('close')">取消</a>
+</div>
+
+<div class="easyui-window" data-options="closed:true," id="orderInfo" title="修改订单信息">
+    <iframe id="order-info" frameborder="0" style="width: 670px;height: 400px;" scrolling="no"></iframe>
+</div>
+
+<div id="dlg-remark" title="添加备注" class="easyui-dialog" style="width:320px;height:auto;padding:10px 20px" closed="true" buttons="#dlg-buttons-remark">
+    <textarea data-options="required:true" class="easyui-textarea" rows="10" cols="34" id="remark"></textarea>
+</div>
+
+
+{% endblock %}
+
+{% block js %}
+<script>
+    var orderId = '{{detail.id}}';
+
+
+    $(function() {
+        $('#deliver-show').click(function(){
+            $('#deliver-info').prop('src',  '/act-order/prepare?id=' + orderId);
+            $('#deliver').window('open');
+        })
+
+        $('#send-show').click(function(){
+            $('#send-info').prop('src',  '/act-order/ship?id=' + orderId);
+            $('#send').window('open');
+        })
+
+        $('#confirm').click(function(){
+            var id = "{{ detail.id }}";
+            $.post('{{ url(["/act-order/confirm"]) }}', {id: id}, function (data) {
+                if(data == 1){
+                    $.messager.alert('失败', '确认失败');
+                    return false;
+                }else{
+                    $.messager.alert('成功', '确认成功');
+                    setTimeout(function(){
+                        window.location.reload();
+                        parent.reloadgrid();
+                    }, 1000);
+                }
+            });
+        });
+    });
+
+    function saveRefuse(){
+        var content = $('#fail').val();
+        $.post('/act-order/refuse?id='+orderId, {'confirm_reason':content}, function(data){
+            if(data.error == 0){
+                $.messager.alert('成功', data.message);
+                setTimeout(function(){
+                    window.location.reload();
+                    parent.reloadgrid();
+                }, 2000);
+            }else{
+                $.messager.alert(data.message);
+                return false;
+            }
+        })
+    }
+
+    function refuse(){
+        $('#dlg-refuse').window('open');
+    }
+
+    function editOrder(){
+        $('#orderInfo').window('open');
+        $('#order-info').prop('src',  '/act-order/edit?id=' + orderId);
+    }
+
+    function addRemark() {
+        var remark = $('#remark').val();
+        $.post('/act-order/add-remark', {'id':orderId, 'remark':remark}, function(data){
+            if(data == 1){
+                $.messager.alert('成功', '添加成功');
+                setTimeout(function(){
+                    window.location.reload();
+                }, 100);
+            }else{
+                $.messager.alert('错误', '添加失败', 'error');
+                return false;
+            }
+        })
+    }
+
+</script>
+
+{% endblock %}

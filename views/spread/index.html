@@ -1,0 +1,46 @@
+{% extends '@app/views/base.html' %}
+
+{% block main %}
+<div class="search">
+    <span>渠道名称
+        <input type="text" name="spread" value="{{spread}}" id="spread">
+    </span>&nbsp;
+    <span>选择时间
+        <input class="easyui-datetimebox" style="width:200px" name="startTime" id="starttime"> 到
+        <input class="easyui-datetimebox" style="width:200px" name="endTime" id="endtime">
+    </span>&nbsp;
+    <a href="javascript:void(0);" onclick="reloadgrid();" class="easyui-linkbutton" iconCls="icon-search">搜索</a>
+</div>
+<table title="数据统计" id="listdata" class="easyui-datagrid"
+       data-options="toolbar:'#tb-user',rownumbers:true,singleSelect:true,pagination:true,method:'get',url:'{{ url('/spread/index') }}',rownumbers: false">
+    <thead>
+    <tr>
+        <th data-options="field:'spread_source_name',align:'center'" width="100">渠道名称</th>
+        <th data-options="field:'spread_source', align:'center'" width="100">渠道标示</th>
+        <th data-options="field:'reg_nums', align:'center'" width="100">注册人数</th>
+        <th data-options="field:'recharge_nums', align:'center'" width="100">充值人数</th>
+        <th data-options="field:'recharge_money', align:'center'" width="100">充值金额</th>
+        <th data-options="field:'consume_nums', align:'center'" width="100">消费人数</th>
+        <th data-options="field:'consume_money', align:'center'" width="100">消费金额</th>
+        <th data-options="field:'consume_point', align:'center'" width="100">消费积分</th>
+    </tr>
+
+    </thead>
+</table>
+
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+    function reloadgrid(){
+    var queryParams = $('#listdata').datagrid('options').queryParams;
+    queryParams.spread = $('#spread').val();
+    queryParams.starttime = $('#starttime').datetimebox('getValue');
+    queryParams.endtime = $('#endtime').datetimebox('getValue');
+
+    queryParams.random_param = Math.random();
+    $('#listdata').datagrid('options').queryParams = queryParams;
+    $("#listdata").datagrid('reload');
+}
+</script>
+{% endblock %}

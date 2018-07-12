@@ -1,0 +1,64 @@
+{% extends '@app/views/base.html' %}
+
+{% block main %}
+<div class="easyui-panel">
+    {{ html.beginForm('', 'post', {'class':'am-form am-form-horizontal', 'id':'submitForm','enctype':"multipart/form-data"}) | raw }}
+    <table cellpadding="5">
+        <tr>
+            <td>站点</td>
+            <td>
+                <select name="HonourDesc[from]">
+                    <option value="1" {% if model.from=="1" %}selected{% endif %}>伙购网</option>
+                    <option value="2" {% if model.from=="2" %}selected{% endif %}>滴滴夺宝</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>添加标题</td>
+            <td><input class="easyui-textbox" name="HonourDesc[title]" data-options="required:true" value="{{ model.title }}"></td>
+        </tr>
+        <tr>
+            <td>添加图片</td>
+            <td>
+                <img src="{{ model.icon }}"><input class="easyui-filebox" name="picture" data-options="prompt:'上传图片'" style="width:100%" data-options="required:true">
+            </td>
+        </tr>
+        <tr>
+            <td>描述</td>
+            <td>
+                <textarea name="HonourDesc[desc]" rows="8" cols="25">{{ model.desc }}</textarea>
+            </td>
+        </tr>
+    </table>
+    {{ html.endForm() | raw }}
+</div>
+
+<div id="dlg-buttons-add" style="text-align:center;padding:5px">
+    <a class="easyui-linkbutton" iconCls="icon-ok" onclick="submitForm()">确定</a>
+    <a class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:parent.location.reload();">取消</a>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+    function submitForm(){
+        $('#submitForm').form({
+            url: '/honour/edit?id='+ "{{ model.id }}",
+            success: function (data) {
+                data = eval('(' + data + ')');
+                if (data.error == 0) {
+                    $.messager.alert('成功', data.message);
+                    setTimeout(function(){parent.location.reload();}, 2000);
+                } else {
+                    $.messager.alert('失败', data.message);
+                    return false;
+                }
+            }
+        });
+        $('#submitForm').submit();
+    }
+    function clearForm(){
+        $('#submitForm').form('clear');
+    }
+</script>
+{% endblock %}

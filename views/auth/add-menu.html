@@ -1,0 +1,81 @@
+{% extends '@app/views/base.html' %}
+
+{% block main %}
+
+<style type="text/css">
+    .inputText{
+        border:1px solid #95B8E7;
+        height: 24px;
+        line-height: 24px;
+        width:140px;
+    }
+    .combo{
+        height: 24px !important;
+        line-height: 24px;
+    }
+</style>
+
+<div class="easyui-panel" title="新增菜单">
+    <div style="padding:10px 0 10px 60px">
+        {{ html.beginForm('', 'post', {'class':'am-form am-form-horizontal', 'id':'product-form'}) | raw }}
+        <table>
+            <tr>
+                <td><span>*</span>{{ html.activeLabel(model, 'parent_id', {})|raw }}:</td>
+                <td>
+                    <select name="Menu[parent_id]" class="easyui-combobox">
+                        <option value="0">顶级</option>
+                        {% for item in menu %}
+                        <option value="{{ item.id }}">{{ item.name }}</option>
+                            {% for second in item.children %}
+                            <option value="{{ second.id }}">--{{ second.name }}</option>
+                            {% endfor %}
+                        {% endfor %}
+                    </select>
+                </td>
+            </tr>
+
+            <tr>
+                <td><span>*</span>{{ html.activeLabel(model, 'name', {})|raw }}:</td>
+                <td><input class="easyui-validatebox inputText" type="text" name="Menu[name]" ata-options="required:true"></input> 必填，导航菜单名{{ html.error(model, 'name', {'class':'am-alert am-alert-danger'})|raw }}</td>
+            </tr>
+
+            <tr>
+                <td><span>*</span>{{ html.activeLabel(model, 'route', {})|raw }}:</td>
+                <td>
+                    <select name="Menu[route]" class="easyui-combobox">
+                        <option value="0"></option>
+                        {% for item in routelist %}
+                        <option value="{{ item.id }}">{{ item.url }}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+            </tr>
+
+            <tr>
+                <td><span>*</span>{{ html.activeLabel(model, 'status', {})|raw }}:</td>
+                <td>
+                    <select name="Menu[status]" class="easyui-combobox">
+                        <option value="1">启用</option>
+                        <option value="2">禁用</option>
+                    </select>
+                </td>
+            </tr>
+
+            <tr>
+                <td><span>*</span>{{ html.activeLabel(model, 'order', {})|raw }}:</td>
+                <td><input class="easyui-validatebox inputText" type="text" name="Menu[order]" value="0"></input> </td>
+            </tr>
+
+            <tr>
+                <td>&nbsp;</td>
+                <td>
+                    <input type="submit" class="easyui-linkbutton" >
+                </td>
+            </tr>
+        </table>
+        {{ html.endForm() | raw }}
+    </div>
+</div>
+
+{% endblock %}
+

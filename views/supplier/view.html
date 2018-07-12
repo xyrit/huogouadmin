@@ -1,0 +1,42 @@
+{% extends '@app/views/base.html' %}
+
+{% block main %}
+<div style="padding:10px 60px 20px 60px">
+    <table cellpadding="5">
+        <tr>
+            <td>供应商名称</td>
+            <td>{{ model.name }}</td>
+        </tr>
+        <tr>
+            <td>联系人</td>
+            <td>{{ model.contact }}</td>
+        </tr>
+        <tr>
+            <td>联系方式</td>
+            <td>{{ model.contact_way }}</td>
+        </tr>
+        <tr>
+            <td>详细地址</td>
+            <td>{{ model.address }}</td>
+        </tr>
+    </table>
+    <table id="product_list" style="margin-top: 20px; margin-bottom: 20px">
+        <thead>
+        <tr>
+            <th style="width: 100px">商品编码</th>
+            <th style="width: 500px;">商品名称</th>
+            <th style="width: 150px;">采购价</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for item in product %}
+        <tr>
+            <td align="center">{{ item.product_id }}</td>
+            <td align="center">{{ item.product_name }}</td>
+            <td align="center">{{ item.price }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

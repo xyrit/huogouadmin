@@ -1,0 +1,42 @@
+{% extends '@app/views/base.html' %}
+
+{% block main %}
+<div class="search">
+    <span>账户余额：<b>{{ user.money }}</b></span>
+    <span style="float: right">
+        <select class="easyui-combobox" id="type" name="type" data-options="panelHeight:'auto', onSelect:reloadgrid">
+            <option value="1">充值</option>
+            <option value="2">消费</option>
+            <option value="3">转账</option>
+        </select>
+    </span>
+</div>
+<table id="listdata" class="easyui-datagrid" title="账户变动明细" data-options="singleSelect:false,pagination:true,method:'get',url:'{{ url('member/money', {id: user.id}) }}',pageSize: 20">
+    <thead>
+    <tr>
+        <th data-options="field:'created_at', width:180, align:'center'" formatter="formatTime">时间</th>
+        <th data-options="field:'type', width:120, align:'center'">变动类型</th>
+        <th data-options="field:'content', width:400, align:'center'">内容</th>
+        <th data-options="field:'money', width:100, align:'center'">账户变动</th>
+    </tr>
+    </thead>
+</table>
+
+{% endblock %}
+
+{% block script %}
+<script>
+    function reloadgrid(){
+        var queryParams = $('#listdata').datagrid('options').queryParams;
+        queryParams.type = $('#type').combobox('getValue');
+        $('#listdata').datagrid('options').queryParams = queryParams;
+        $("#listdata").datagrid('reload');
+    }
+    function formatTime(val, row) {
+        var newDate_attend = new Date();
+        newDate_attend.setTime(val * 1000);
+        var my_create_time_attend=newDate_attend.format('yyyy-MM-dd hh:mm:ss');
+        return my_create_time_attend;
+    }
+</script>
+{% endblock %}

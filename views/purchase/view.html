@@ -1,0 +1,70 @@
+{% extends '@app/views/base.html' %}
+
+{% block main %}
+<div style="padding:10px 60px 20px 60px">
+    <table cellpadding="5" id="list">
+        <tr><td width="100px">订单编号</td><td>{{ model.id }}</td></tr>
+        <tr><td>订单详情</td></tr>
+        <tr><td colspan="2">
+            <table border="1" cellspacing="0">
+                <thead>
+                <tr>
+                    <th width="600px">商品</th>
+                    <th width="100px">供应商</th>
+                    <th width="100px">单价(元)</th>
+                    <th width="100px">数量</th>
+                    <th width="100px">总价(元)</th>
+                    <th width="100px">优惠</th>
+                    <th width="100px">合计(元)</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for item in orderItem %}
+                <tr align="center">
+                    <td>{{ item.product_name }}</td>
+                    <td>{{ item.supplier_name }}</td>
+                    <td>{{ item.supplier_price }}</td>
+                    <td>{{ item.product_num }}</td>
+                    <td>{{ item.sum }}</td>
+                    <td>{{ item.privilege }}</td>
+                    <td>{{ item.total }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </td></tr>
+        <tr><td></td><td style="float: right">订单金额：{{ totalPrice }}(元)</td></tr>
+        <tr>
+            <td>申请人</td>
+            <td>{{ model.admin_name }}</td>
+        </tr>
+        <tr>
+            <td>申请时间</td>
+            <td>{{ model.created_at|date('Y-m-d H:i:s') }}</td>
+        </tr>
+        {% if model.approve_admin_id %}
+        <tr>
+            <td>审核人</td>
+            <td>{{ model.approve_admin_name }}</td>
+        </tr>
+        <tr>
+            <td>审核状态</td>
+            <td>{% if model.status == 1 %}审核通过{% else %}审核不通过{% endif %}</td>
+        </tr>
+        {% if model.status == 2 %}
+        <tr>
+            <td>不通过原因</td>
+            <td>{{ model.note }}</td>
+        </tr>
+        {% endif %}
+        <tr>
+            <td>申请时间</td>
+            <td>{{ model.created_at|date('Y-m-d H:i:s') }}</td>
+        </tr>
+        {% endif %}
+    </table>
+</div>
+{% endblock %}
+
+{% block script %}
+{% endblock %}

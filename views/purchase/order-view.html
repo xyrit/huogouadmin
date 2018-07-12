@@ -1,0 +1,94 @@
+{% extends '@app/views/base.html' %}
+
+{% block main %}
+<div style="padding:10px 60px 20px 60px">
+    <table cellpadding="5" id="list">
+        <tr>
+            <td>申请人：</td><td>{% if info.username %}{{ info.username }}{% else %}system{% endif %}</td>
+        </tr>
+        <tr>
+            <td>类型：</td><td>{% if info.type == 1 %}实物</a>{% elseif info.type == 2 %}虚拟物品{% endif %}</td>
+        </tr>
+        <tr>
+            <td>商品名称：</td><td>{{ info.product_name }}</td>
+        </tr>
+        <tr>
+            <td>购买数量：</td><td>{{ info.nums }}</td>
+        </tr>
+        <tr>
+            <td>单价：</td>
+            <td>{{ info.per_money }}</td>
+        </tr>
+        <tr>
+            <td>总价：</td>
+            <td>{{ info.total }}</td>
+        </tr>
+        <tr>
+            <td>状态：</td>
+            <td>{{ info.status }}</td>
+        </tr>
+        <tr>
+            <td>创建时间：</td>
+            <td>{{ info.create_time | date("Y-m-d H:i:s") }}</td>
+        </tr>
+        <tr>
+            <td>最后更新时间：</td>
+            <td>{{ info.last_update_time | date("Y-m-d H:i:s") }}</td>
+        </tr>
+        <tr>
+            <td>进度：</td>
+            <td>
+                {% for item in info.schedule %}
+                 {{item.time}} {{item.user}} {{item.schedule}}<br />
+                {% endfor %}
+            </td>
+        </tr>
+        <tr>
+            <td>订单号：</td>
+            <td>{{ info.order.orderid }}</td>
+        </tr>
+        {% if info.type == 2 %}
+        <tr>
+            <td>第三方订单号：</td>
+            <td>{{ info.order.exchange_no }}</td>
+        </tr>
+        <tr>
+            <td>第三方返回结果：</td>
+            <td>{% if info.order.status == 1 %}购买成功{% else %}购买失败{% endif %}</td>
+        </tr>
+        <tr>
+            <td>结果详情：</td>
+            <td>
+                {% if info.order.status == 1 %}
+                    {% for card in info.cards %}
+                       {{ card.pwd }}
+                    {% endfor %}
+                {% else %}
+                    {{ info.order.result }}
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td>返回时间：</td>
+            <td>{{ info.order.update_time | date("Y-m-d H:i:s") }}</td>
+        </tr>
+        {% endif %}
+        {% if info.status == '待审核' %}
+        <tr>
+            <td>审核：</td>
+            <td><button onclick="verify()">通过</button> &nbsp;&nbsp;</td>
+        </tr>
+        {% endif %}
+    </table>
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+    function verify()
+    {
+        $.get("{{ url('/purchase/pass')}}?id="+"{{ info.id }}",function(data){})
+    }
+</script>
+
+{% endblock %}

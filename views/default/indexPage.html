@@ -1,0 +1,193 @@
+{% extends '@app/views/base.html' %}
+
+
+{% block main %}
+
+<!-- content start -->
+<div class="admin-content">
+
+    <style>
+        .admin-main {
+            background: #f3f3f3;
+        }
+
+        .admin-content {
+            width: auto;
+            height: 100%;
+            background: #fff;
+        }
+
+        .am-padding {
+            padding: 1.6rem;
+        }
+
+        .am-g {
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .am-u-md-12 {
+            width: 100%;
+        }
+
+        .am-panel-default {
+            border-color: #ddd;
+        }
+
+        .am-panel {
+            margin-bottom: 20px;
+            background-color: #fff;
+            border: 1px solid transparent;
+            border-radius: 0;
+            -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
+            box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
+            overflow: hidden;
+        }
+
+        .am-g .am-g {
+
+            margin-right: -1.5rem;
+        }
+
+        .am-panel-default > .am-panel-hd {
+            color: #444;
+            background-color: #f5f5f5;
+            border-color: #ddd;
+            padding-left: 20px;
+        }
+
+        .am-u-sm-2 {
+            height: 30px;
+            padding-top: 25px;
+            width: 16.66666667%;
+            float: left;
+        }
+
+        .am-u-sm-4 {
+            width: 33.33333333%;
+        }
+    </style>
+
+    <div class="am-cf am-padding">
+        <div class="am-fl am-cf"><strong class="am-text-primary am-text-lg">统计看板</strong></div>
+    </div>
+
+    <ul class="am-avg-sm-1 am-avg-md-4 am-margin am-padding am-text-center admin-content-list " style="display: none">
+        <li><a href="{{ url(['/order/all-order']) }}" class="am-text-success"><span
+                class="am-icon-btn am-icon-file-text"></span><br/>已支付<br/>{{ consumeTotal }}</a></li>
+        <li><a href="{{ url('/deliver/index', {'status':3}) }}" class="am-text-warning"><span
+                class="am-icon-btn am-icon-briefcase"></span><br/>待发货<br/>{{ deliverCount.three }}</a></li>
+        <li><a href="{{ url('/order/index', {'status':7}) }}" class="am-text-danger"><span
+                class="am-icon-btn am-icon-recycle"></span><br/>需换货<br/>{{ deliverCount.four }}</a></li>
+        <li><a href="#" class="am-text-secondary"><span class="am-icon-btn am-icon-user-md"></span><br/><br/></a></li>
+    </ul>
+
+    <div class="am-g">
+        <div class="am-u-md-12">
+            <div class="am-panel am-panel-default">
+                <div class="am-panel-hd am-cf" data-am-collapse="{target: '#collapse-panel-2'}">财务数据<span
+                        class="am-icon-chevron-down am-fr"></span></div>
+                <div class="am-g">
+                    <div class="am-u-sm-2" id="incomeTotal">总参与人次：<span><a
+                            href="javascript:void(0);"onclick="getValue('incomeTotal')">点击查看</a></span></div>
+                    <div class="am-u-sm-2" id="moneyTotal">总充值金额：<span><a href="javascript:void(0);"
+                                                                          onclick="getValue('moneyTotal')">点击查看</a></span></div>
+                    <div class="am-u-sm-2">账号总余额：{{ return.balance }}元</div>
+                    <div class="am-u-sm-2">佣金余额：{{ return.comm }}元</div>
+                    <div class="am-u-sm-4"></div>
+                </div>
+            </div>
+
+            <div class="am-panel am-panel-default">
+                <div class="am-panel-hd am-cf" data-am-collapse="{target: '#collapse-panel-2'}">福分数据<span
+                        class="am-icon-chevron-down am-fr"></span></div>
+                <div class="am-g">
+                    <div class="am-u-sm-2">邀请福分：{{ return.inviteTotal }}</div>
+                    <div class="am-u-sm-2">资料福分：{{ return.taskTotal }}</div>
+                    <div class="am-u-sm-2">晒单福分：{{ return.shareTotal-5000 }}</div>
+                    <div class="am-u-sm-2">购买福分：{{ return.comTotal }}</div>
+                    <div class="am-u-sm-2"></div>
+                    <div class="am-u-sm-2"></div>
+                </div>
+                <div class="am-g">
+                    <div class="am-u-sm-2">抵扣福分：{{ return.totalComsue }}</div>
+                    <div class="am-u-sm-2">余额福分：{{ return.totalPoint }}</div>
+                    <div class="am-u-sm-2">后台操作：{{ return.modifyTotal }}</div>
+                    <div class="am-u-sm-6"></div>
+                </div>
+            </div>
+
+            <div class="am-panel am-panel-default">
+                <div class="am-panel-hd am-cf" data-am-collapse="{target: '#collapse-panel-2'}">运营数据<span
+                        class="am-icon-chevron-down am-fr"></span></div>
+                <div class="am-g">
+                    <div class="am-u-sm-2">一级分类：{{ return.cateTotal }}个</div>
+                    <div class="am-u-sm-2">品牌：{{ return.brandTotal }}个</div>
+                    <div class="am-u-sm-2">商品总数量：{{ return.productTotal }}个</div>
+                    <div class="am-u-sm-2">在售数量：{{ return.onlineTotal }}个</div>
+                    <div class="am-u-sm-2">会员数量：{{ return.userTotal }}个</div>
+                    <div class="am-u-sm-2"></div>
+                </div>
+            </div>
+
+            <div class="am-panel am-panel-default">
+                <div class="am-panel-hd am-cf" data-am-collapse="{target: '#collapse-panel-2'}">今日数据<span
+                        class="am-icon-chevron-down am-fr"></span></div>
+                <div class="am-g">
+                    <div class="am-u-sm-2">今日新增会员：{{ return.toadyTotal }}个</div>
+                    <div class="am-u-sm-2" id="todayIncomeTotal">今日收入：<span><a
+                            href="javascript:void(0);"onclick="getValue('todayIncomeTotal')">点击查看</a></span></div>
+                    <div class="am-u-sm-2" id="rechargeTotal">今日充值：<span><a
+                            href="javascript:void(0);"onclick="getValue('rechargeTotal')">点击查看</a></span></div>
+                    <div class="am-u-sm-2">今日开奖：{{ return.luckyTotal }}次</div>
+                    <div class="am-u-sm-2">今日发货：{{ return.deliverTotal }}次</div>
+                    <div class="am-u-sm-2"></div>
+                </div>
+            </div>
+
+            <div class="am-panel am-panel-default">
+                <div class="am-panel-hd am-cf" data-am-collapse="{target: '#collapse-panel-2'}">进行中订单状态统计<span
+                        class="am-icon-chevron-down am-fr"></span></div>
+                <div class="am-g">
+                    <div class="am-u-sm-2">已中奖：{{ order.one }}</div>
+                    <div class="am-u-sm-2">待确认：{{ order.two }}</div>
+                    <div class="am-u-sm-2">待备货：{{ order.three }}</div>
+                    <div class="am-u-sm-2">待发货：{{ order.four }}</div>
+                    <div class="am-u-sm-2">待收货：{{ order.five }}</div>
+                    <div class="am-u-sm-2">异常订单：{{ order.seven }}</div>
+                </div>
+            </div>
+
+            <div class="am-panel am-panel-default">
+                <div class="am-panel-hd am-cf" data-am-collapse="{target: '#collapse-panel-2'}">热销伙购商品<span
+                        class="am-icon-chevron-down am-fr"></span></div>
+                <div class="am-g">
+                    <table class="am-u-sm-12">
+                        <tbody>
+                        {% for item in hotProductList %}
+                        <tr>
+                            <td class="am-u-sm-1"></td>
+                            <td class="am-u-sm-7">{{ item.product_id }}</td>
+                            <td class="am-u-sm-4">{{ item.period_number }}期</td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- content end -->
+<script>
+    function getValue(s) {
+        $.get('{{ url("default/index-page") }}', {'is_ajax': s}, function (data) {
+            if (data.error == 0) {
+                $("#"+s+" span").html(data.msg);
+            } else {
+                $.messager.alert('失败', data.msg, 'error');
+            }
+        })
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends '@app/views/base.html' %}
+
+{% block main %}
+<table title="注册礼包配置" id="listdata" class="easyui-datagrid" data-options="toolbar:'#tb-user'"></table>
+<div id="tb-user" style="height:auto">
+    {{ html.beginForm('','post',{'class':'am-form am-form-horizontal', 'id':'addForm'}) | raw }}
+    <table cellSpacing=10>
+        <tr>
+            <th>活动状态</th>
+            <td colspan="2">
+                <select class="easyui-combobox" name="status" style="height: auto;">
+                    <option value="0" {% if config.status == 0 %}selected="selected"{% endif %} >关闭</option>
+                    <option value="1" {% if config.status == 1 %}selected="selected"{% endif %} >开启</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <th>活动起止日期</th>
+            <td colspan="2"><input class="easyui-datetimebox" type="text" id="starttime" name="starttime" formatter="formatTime" value="{{ config.starttime }}">到<input class="easyui-datetimebox" type="text" id="endtime" name="endtime" formatter="formatTime" value="{{ config.endtime }}"></td>
+        </tr>
+        <tr>
+            <th>活动说明</th>
+            <td colspan="2">
+                <textarea class="easyui-textareabox" name="intr" rows="10" cols="60">{{ config.intr }}</textarea>
+            </td>
+        </tr> 
+        <tr>
+            <th rowspan="2">获取条件</th>
+            <td width="60">适用终端</td>
+            <td>
+                <input type="checkbox" name="terminal[]" value="0" class="easyui-checkboxbox" checked="checked">全部
+                <input type="checkbox" name="terminal[]" value="1" class="easyui-checkboxbox">PC
+                <input type="checkbox" name="terminal[]" value="2" class="easyui-checkboxbox">微信
+                <input type="checkbox" name="terminal[]" value="3" class="easyui-checkboxbox">IOS
+                <input type="checkbox" name="terminal[]" value="4" class="easyui-checkboxbox">Android
+                <input type="checkbox" name="terminal[]" value="5" class="easyui-checkboxbox">WAP
+            </td>
+        </tr>
+        <tr>
+            <td>适用渠道</td>
+            <td>
+                <input type="checkbox" name="conduit[]" value="0" class="easyui-checkboxbox" checked="checked">全部
+            </td>
+        </tr>
+        <tr>
+            <th>选择红包</th>
+            <td colspan="2">
+                <select class="easyui-combobox" name="packet" style="height: auto;">
+                    {% for item in packets %}
+                    <option value="{{ item.id }}" {% if config.packet_id == item.id %}selected="selected"{% endif %}>{{ item.name }}</option>
+                    {% endfor %}
+                </select>                
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3">
+                <div id="dlg-buttons-add" style="text-align:center;padding:5px">
+                    <a class="easyui-linkbutton" iconCls="icon-ok" onclick="save()">保存</a>
+                </div>
+            </td>
+        </tr>
+    </table>
+    {{ html.endForm() | raw }}
+</div>
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+    function save(){
+        $("#addForm").form('submit',{
+            success:function(data){
+                data = eval("(" + data + ")");
+                if (data.code == 100) {
+                    $.messager.alert('保存成功', '保存成功', 'success');
+                }else{
+                    $.messager.alert('保存失败', '保存失败', 'fail');
+                }
+            }
+        })
+    }
+</script>
+{% endblock %}

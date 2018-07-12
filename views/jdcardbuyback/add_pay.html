@@ -1,0 +1,258 @@
+{% extends '@app/views/base.html' %}
+
+{% block main %}
+
+<style type="text/css">
+    .inputText {
+        border: 1px solid #95B8E7;
+        height: 24px;
+        line-height: 24px;
+        width: 140px;
+    }
+
+    .combo {
+        height: 24px !important;
+        line-height: 24px;
+    }
+
+    .czjl span {
+        margin-left: 10px;
+    }
+
+    .desc_log span{ margin: 0 7px 0 0;}
+    .xiugai{text-decoration: underline; margin-left: 15px; color: red}
+</style>
+
+<div class="easyui-panel" title="详情">
+    <div style="padding:10px 0 10px 60px">
+        <table>
+            <tr>
+                <td>期数</td>
+                <td>{{buyback.period_id}}</td>
+            </tr>
+            <tr>
+                <td>昵称</td>
+                <td>{{userinfo.nickname}}</td>
+            </tr>
+            <tr>
+                <td>获奖用户手机号</td>
+                <td>{{userinfo.phone}}</td>
+            </tr>
+            <tr>
+                <td>状态</td>
+                <td> {% if buyback.pay_status==0 %}
+                    待填写信息
+                    {% elseif buyback.pay_status==1 %}
+                    已付款
+                    {% elseif buyback.pay_status==2 %}
+                    未付款
+                    {% else %}
+                    未知
+                    {% endif %}
+                </td>
+            </tr>
+        </table>
+        {% if buyback.pay_status==2 %}
+        {{ html.beginForm('/jdcardbuyback/querybuyback', 'post', {'class':'am-form am-form-horizontal', 'id':'product-form'}) | raw }}
+        <table id="buyback">
+            <tr id="pay_typetr">
+                <td>支付类型:</td>
+                <td>
+                    {% if buyback.pay_type==1 %}
+                    支付宝
+                    {% elseif buyback.pay_type==2 %}
+                    微信
+                    {% elseif buyback.pay_type==3 %}
+                    银行卡
+                    {% else %}
+                    未知
+                    {% endif %}
+                </td>
+            </tr>
+            <tr id="bank_name">
+                <td>开户行:</td>
+                <td>{{buyback.bank_name}}</td>
+            </tr>
+            <tr id="pay_accounts">
+                <td>帐号:</td>
+                <td>
+                    <span class="on_change">{{buyback.pay_accounts}}</span>
+                    <span class="off_change" style="display: none"><input class="easyui-validatebox inputText changetext" type="text" name="pay_accounts" value="{{buyback.pay_accounts}}"></span>
+                    <span class="xiugai">修改</span>
+                </td>
+            </tr>
+            <tr id="pay_name">
+                <td>用户名:</td>
+                <td >
+                    <span class="on_change" data-name="pay_name">{{buyback.pay_name}}</span>
+                    <span class="off_change" style="display: none"><input class="easyui-validatebox inputText changetext" type="text" name="pay_name" value="{{buyback.pay_accounts}}"></span>
+                    <span class="xiugai">修改</span></td>
+            </tr>
+            <tr id="rate">
+                <td>回收折扣:</td>
+                <td>{{buyback.rate}}折</td>
+            </tr>
+            <tr id="pay_money">
+                <td>付款金额:</td>
+                <td>{{buyback.pay_money}}</td>
+            </tr>
+            <tr id="pay_desc">
+                <td>备注:</td>
+                <td>{{buyback.pay_desc}}</td>
+            </tr>
+            <tr id="pay_no">
+                <td>订单号:</td>
+                <td><input class="easyui-validatebox inputText" type="text" name="buyback[pay_no]"></td>
+            </tr>
+            <tr id="submit">
+                <td>&nbsp;</td>
+                <td>
+                    <input class="easyui-validatebox inputText" type="hidden" name="buyback[id]" value="{{buyback.id}}">
+                    <input type="button" onclick="save()" class="am-btn am-btn-primary" value="确定">
+                </td>
+            </tr>
+        </table>
+        {{ html.endForm() | raw }}
+        {% elseif buyback.pay_status==1 %}
+        <table id="buyback">
+            <tr id="pay_typetr">
+                <td>支付类型:</td>
+                <td>
+                    {% if buyback.pay_type==1 %}
+                    支付宝
+                    {% elseif buyback.pay_type==2 %}
+                    微信
+                    {% elseif buyback.pay_type==3 %}
+                    银行卡
+                    {% else %}
+                    未知
+                    {% endif %}
+                </td>
+            </tr>
+            <tr id="bank_name">
+                <td>开户行:</td>
+                <td>{{buyback.bank_name}}</td>
+            </tr>
+            <tr id="pay_accounts">
+                <td>帐号:</td>
+                <td >{{buyback.pay_accounts}}</td>
+            </tr>
+            <tr id="pay_name">
+                <td>用户名:</td>
+                <td>{{buyback.pay_name}} 修改</td>
+            </tr>
+            <tr id="rate">
+                <td>回收折扣:</td>
+                <td>{{buyback.rate}}折</td>
+            </tr>
+            <tr id="pay_money">
+                <td>付款金额:</td>
+                <td>{{buyback.pay_money}}</td>
+            </tr>
+            <tr id="pay_no">
+                <td>交易订单号:</td>
+                <td>{{buyback.pay_no}}</td>
+            </tr>
+            <tr id="pay_desc">
+                <td>备注:</td>
+                <td>{{buyback.pay_desc}}</td>
+            </tr>
+        </table>
+        {% endif %}
+
+        <div class="czjl"><P style="color: red">操作记录</P>
+            {% if action_log.log_status2 !='' %}
+            <p><span>填写订单</span><span>操作人:{{action_log.log_status2.real_name}}</span><span>时间:{{action_log.log_status2.time}}</span>
+            </p>
+            {%endif%}
+            {% if action_log.log_status1 !='' %}
+            <p><span>确认订单</span><span>操作人:{{action_log.log_status1.real_name}}</span><span>时间:{{action_log.log_status1.time}}</span>
+            </p>
+            {%endif%}
+        </div>
+        <div class="bzjl">
+            <p style="color: red">订单备注记录</p>
+            {% for key,item in desc_log %}
+            <p class="desc_log"><span>{{item.op_user}}</span><span>{{item.op_content}}</span><span>{{item.op_time}}</span></p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block js %}
+<script>
+
+    $('.xiugai').click(function () {
+        $(this).hide();
+        $(this).prev().show();
+        $(this).prev().prev().hide();
+        })
+
+    $('.changetext').blur(function () {
+        var name=$(this).attr('name');
+        var val = $(this).val();
+        var id={{buyback.id}};
+        var change=$(this);
+        $.post('/jdcardbuyback/one-edit', {'id':id,'name': name, 'val': val}, function (data) {
+            if (data.code == 1) {
+                change.parent().prev().text(val);
+                change.parent().hide();
+                change.parent().prev().show();
+                change.parent().next().show();
+                alert(data.message)
+            }else{
+                alert(data.message)
+            }
+        })
+
+    })
+
+    $(function () {
+        var id = '{{buyback.pay_type}}';
+        paychange(id);
+    })
+    function paychange(id) {
+        $('#buyback').find('tr').hide();
+        $('#pay_typetr').show();
+        $('#pay_money').show();
+        $('#rate').show();
+        $('#submit').show();
+        $('#pay_no').show();
+        if (id == 1)   //支付宝
+        {
+            $('#pay_accounts').show();
+            $('#pay_accounts').find('td').eq(0).text('支付宝帐号');
+            $('#pay_name').show();
+            $('#pay_name').find('td').eq(0).text('用户名');
+            $('#pay_desc').show();
+
+        } else if (id == 2) { //微信
+            $('#pay_accounts').show();
+            $('#pay_accounts').find('td').eq(0).text('微信帐号');
+
+        } else {          //银行卡
+            $('#bank_name').show();
+            $('#pay_accounts').show();
+            $('#pay_name').show();
+            $('#pay_name').find('td').eq(0).text('姓名');
+        }
+    }
+
+    function save() {
+        $("#product-form").form('submit', {
+            success: function (data) {
+                data = eval("(" + data + ")");
+                console.log(data)
+                if (data.code == 1) {
+                    $.messager.alert('保存成功', '保存成功', 'success');
+                    window.location.reload();
+                } else {
+                    $.messager.alert('保存失败', data.message, 'fail');
+                }
+            }
+        })
+    }
+</script>
+{% endblock %}
+
+

@@ -1,0 +1,51 @@
+{% extends '@app/views/base.html' %}
+
+{% block main %}
+<table title="注册礼包配置" id="listdata" class="easyui-datagrid" data-options="toolbar:'#tb-user'"></table>
+<div id="tb-user" style="height:auto">
+    {{ html.beginForm('','post',{'class':'am-form am-form-horizontal', 'id':'addForm'}) | raw }}
+    <table cellSpacing=10>
+        <tr>
+            <th>活动状态</th>
+            <td colspan="2">
+                <select class="easyui-combobox" name="status" style="height: auto;">
+                    <option value="0" {% if config.status== 0 %}selected="selected" {% endif %}>关闭</option>
+                    <option value="1" {% if config.status== 1 %}selected="selected" {% endif %}>开启</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <th>活动起止日期</th>
+            <td colspan="2"><input class="easyui-datetimebox" type="text" id="starttime" name="starttime"
+                                   formatter="formatTime" value="{{ config.starttime }}">到<input
+                    class="easyui-datetimebox" type="text" id="endtime" name="endtime" formatter="formatTime"
+                    value="{{ config.endtime }}"></td>
+        </tr>
+        <tr>
+            <td colspan="3">
+                <div id="dlg-buttons-add" style="text-align:center;padding:5px">
+                    <a class="easyui-linkbutton" iconCls="icon-ok" onclick="save()">保存</a>
+                </div>
+            </td>
+        </tr>
+    </table>
+    {{ html.endForm() | raw }}
+</div>
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+    function save() {
+        $("#addForm").form('submit', {
+            success: function (data) {
+                data = eval("(" + data + ")");
+                if (data.code == 100) {
+                    $.messager.alert('保存成功', '保存成功', 'success');
+                } else {
+                    $.messager.alert('保存失败', '保存失败', 'fail');
+                }
+            }
+        })
+    }
+</script>
+{% endblock %}

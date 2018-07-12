@@ -1,0 +1,117 @@
+{% extends '@app/views/base.html' %}
+
+{% block main %}
+<div style="margin:20px 0;"></div>
+<div class="easyui-panel" style="width:400px">
+    <div style="padding:10px 60px 20px 60px">
+        {{ html.beginForm('/banner/add', 'post', {'class':'am-form am-form-horizontal', 'id':'submitForm', 'enctype':"multipart/form-data"}) | raw }}
+        <table cellpadding="5">
+            <tr>
+                <td>站点</td>
+                <td>
+                    <select id="banner-from" name="Banner[from]">
+                        <option value="1" >伙购网</option>
+                        <option value="2" >滴滴夺宝</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>banner名称</td>
+                <td><input class="easyui-textbox" type="text" name="Banner[name]" data-options="required:true"></td>
+            </tr>
+            <tr>
+                <td>链接地址</td>
+                <td><input class="easyui-textbox" type="text" name="Banner[link]" data-options="required:true"></td>
+            </tr>
+            <tr>
+                <td>终端</td>
+                <td>
+                    <select id="banner-source" name="Banner[source]">
+                        <option value="0">pc</option>
+                        <option value="1">微信</option>
+                        <option value="2">安卓</option>
+                        <option value="3">ios</option>
+                        <option value="4">wap</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>图片</td>
+                <td><input class="easyui-filebox" type="text" name="picture" data-options="required:true"></td>
+            </tr>
+            <tr>
+                <td>宽度</td>
+                <td><input type="text" name="Banner[width]" readonly id="banner-width"></td>
+            </tr>
+            <tr>
+                <td>高度</td>
+                <td><input type="text" name="Banner[height]" readonly id="banner-height"></td>
+            </tr>
+            <tr>
+                <td>日期</td>
+                <td><input class="easyui-datetimebox" type="text" name="Banner[starttime]"><input class="easyui-datetimebox" type="text" name="Banner[endtime]"></td>
+            </tr>
+            <tr>
+                <td>开启</td>
+                <td><input type="radio" name="Banner[status]" value="1" checked>是<input type="radio" name="Banner[status]" value="0">否</td>
+            </tr>
+            <tr>
+                <td>排序</td>
+                <td><input class="easyui-textbox" type="text" name="Banner[list_order]"></td>
+            </tr>
+        </table>
+        {{ html.endForm() | raw }}
+        <div style="text-align:center;padding:5px">
+            <a href="javascript:void(0)" class="easyui-linkbutton" onclick="submitForm()">确定</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" onclick="clearForm()">取消</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+    $(function() {
+        $('#banner-width').val('1920');
+        $('#banner-height').val('387');
+        $('#banner-source').on('change', function () {
+            var bannerVal = $(this).val();
+            if (bannerVal == 0) {
+                $('#banner-width').val('1920');
+                $('#banner-height').val('387');
+            } else if (bannerVal == 1) {
+                $('#banner-width').val('640');
+                $('#banner-height').val('300');
+            } else if (bannerVal == 2) {
+                $('#banner-width').val('1080');
+                $('#banner-height').val('444');
+            } else if (bannerVal == 3) {
+                $('#banner-width').val('1242');
+                $('#banner-height').val('512');
+            }else if(bannerVal == 4){
+                $('#banner-width').val('640');
+                $('#banner-height').val('300');
+            }
+        });
+    })
+
+    function submitForm(){
+        $('#submitForm').form({
+            success: function (data) {
+                data = eval('(' + data + ')');
+                if (data.error == 0) {
+                    $.messager.alert('成功', data.message);
+                    parent.location.reload();
+                } else {
+                    $.messager.alert('失败', data.message);
+                    return false;
+                }
+            }
+        });
+        $('#submitForm').submit();
+    }
+    function clearForm(){
+        $('#submitForm').form('clear');
+    }
+</script>
+{% endblock %}

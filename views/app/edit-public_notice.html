@@ -1,0 +1,112 @@
+{% extends '@app/views/base.html' %}
+
+{% block main %}
+
+<form id="public_notice" method="post">
+    <table cellpadding="5">
+        <tr>
+            <td>站点</td>
+            <td>
+                <select id="image-from" name="from">
+                    <option value="1" {% if model.from=="1" %}selected{% endif %}>伙购网</option>
+                    <option value="2" {% if model.from=="2" %}selected{% endif %}>滴滴夺宝</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>标题:</td>
+            <td><input class="easyui-textbox" type="text" name="content[notice_title]" value="{{ model.content.notice_title }}" data-options="required:true,width:200"></td>
+        </tr>
+        <tr>
+            <td>简介:</td>
+            <td><input class="easyui-textbox" type="text" name="content[notice_desc]" value="{{ model.content.notice_desc }}" data-options="required:true,width:400"></td>
+        </tr>
+        <tr>
+            <td>图标:</td>
+            <td><input class="easyui-textbox" type="text" name="content[notice_icon]"  value="{{ model.content.notice_icon }}" data-options="required:true,width:200"></td>
+        </tr>
+        <tr>
+            <td>类型:</td>
+            <td>
+                <select name="content[notice_type]" data-options="required:true" id="noticeType">
+                    <option value="default" {% if(model.content.notice_type == 'default') %}selected{% endif %}>默认</option>
+                    <option value="link" {% if(model.content.notice_type == 'link') %}selected{% endif %}>打开链接</option>
+                </select>
+                <input type="text" name="content[notice_link]" style="display: none;width: 300px;" value="{{ model.content.notice_link }}">
+            </td>
+        </tr>
+        <tr id="notice_content">
+            <td>内容:</td>
+            <td>
+                <textarea name="content[notice_content]" style="width: 400px;height: 300px;">{{ model.content.notice_content }}</textarea>
+            </td>
+        </tr>
+        <tr>
+            <td>时间:</td>
+            <td><input class="easyui-datetimebox" type="text" name="content[notice_time]" value="{{ model.content.notice_time }}"  data-options="required:true" /></td>
+        </tr>
+        <tr>
+            <td>是否显示:</td>
+            <td><input type="checkbox" name="status" value="1" {% if(model.status == '1') %}checked{% endif %}></td>
+        </tr>
+    </table>
+</form>
+<div style="text-align:center;padding:5px">
+    <a href="javascript:void(0)" class="easyui-linkbutton" onclick="submitForm()">提交</a>
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+
+    $(function() {
+        selectNoticeTypeSel('{{model.content.notice_type}}');
+    });
+
+    var selectNoticeTypeSel = function(noticeType) {
+        if (noticeType=='default') {
+            $('input[name="content[notice_link]"]').hide();
+            $('#notice_content').show()
+        } else if (noticeType=='link') {
+            $('input[name="content[notice_link]"]').show();
+            $('#notice_content').hide()
+        }
+    }
+    var noticeTypeSel = $('#noticeType').combobox({
+        onSelect:function(record){
+            if (record.value=='default') {
+                $('input[name="content[notice_link]"]').hide();
+                $('#notice_content').show()
+            } else if (record.value=='link') {
+                $('input[name="content[notice_link]"]').show();
+                $('#notice_content').hide()
+            }
+        }
+    });
+
+    function submitForm()
+    {
+        $('#public_notice').form({
+            url: '/app/edit?type=public_notice&id='+"{{ model.id }}",
+            onSubmit: function(param){
+                var isValid = $(this).form('validate');
+                if (!isValid){
+                    $.messager.progress('close');	// 如果表单是无效的则隐藏进度条
+                }
+                return isValid;	// 返回false终止表单提交
+            },
+            success: function (data) {
+                data = eval('(' + data + ')');
+                if (data.error == 0) {
+                    $.messager.alert('成功', data.message);
+                    setTimeout(function(){parent.location.reload()}, 2000);
+                } else {
+                    $.messager.alert('失败', data.message);
+                    return false;
+                }
+            }
+        });
+        $('#public_notice').submit();
+    }
+</script>
+{% endblock %}

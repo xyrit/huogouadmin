@@ -1,0 +1,43 @@
+{% extends '@app/views/base.html' %}
+
+{% block main %}
+<div class="easyui-tabs" style="padding:10px;height: 750px;" id="view_tabs">
+    <div title="签到任务" style="padding:10px;" >
+        <iframe width="100%" height="100%" frameborder="0" id="sign_iframe"></iframe>
+    </div>
+    <div title="新手任务" style="padding:10px;">
+        <iframe width="100%" height="100%" frameborder="0" id="new_iframe"></iframe>
+    </div>
+    <div title="日常任务" style="padding:10px;">
+        <iframe width="100%" height="100%" frameborder="0" id="daily_iframe"></iframe>
+    </div>
+    <div title="成长任务" style="padding:10px;">
+        <iframe width="100%" height="100%" frameborder="0" id="grow_iframe"></iframe>
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+    $('#view_tabs').tabs({
+        onSelect: function(title, index){
+            switch (title) {
+                case '签到任务':
+                    $('#sign_iframe').prop('src', "{{ url('user-task/list', {'type': 1}) }}");
+                    break;
+                case '新手任务':
+                    $('#new_iframe').prop('src', "{{ url('user-task/list', {'type': 2}) }}");
+                    break;
+                case '日常任务':
+                    $('#daily_iframe').prop('src', "{{ url('user-task/list', {'type': 3}) }}");
+                    break;
+                case '成长任务':
+                    $('#grow_iframe').prop('src', "{{ url('user-task/list', {'type': 4}) }}");
+                    break;
+            }
+        }
+    });
+    $('#sign_iframe').prop('src', "{{ url('user-task/list', {'type': 1}) }}");
+    $('#view_tabs').tabs('select', 0);
+</script>
+{% endblock %}

@@ -1,0 +1,187 @@
+{% extends '@app/views/base.html' %}
+
+{% block main %}
+{{ html.beginForm('edit','post',{'class':'am-form am-form-horizontal', 'id':'addForm'}) | raw }}
+<table title="添加充值活动" style="width: 780px;height: auto;" modal="true" closed="true" buttons="#dlg-buttons-add">
+    <thead>
+        <tr>
+            <th width="100px">活动名称</th>
+            <td><input type="text" class="easyui-textbox" name="name"></td>
+        </tr>
+        <tr>
+            <th>活动时间</th>
+            <td>
+                <input class="easyui-datetimebox" type="text" data-options="required:true" id="starttime" name="start_time">到<input class="easyui-datetimebox" type="text" data-options="required:true" id="endtime" name="end_time">
+            </td>
+        </tr>
+        <tr>
+            <th>活动简介</th>
+            <td>
+                <textarea name="intr" rows="10" cols="60" ></textarea>
+            </td>
+        </tr>
+        <tr>
+            <th>奖品设置</th>
+            <td>
+                <ul id="prizeList" style="list-style: none;margin: 0;padding: 0"></ul>
+                <input type="button" class="easyui-linkbotton" value="添加奖品" onclick="javascript:;$('#add_prize').dialog('open')" id="addPrize">
+            </td>
+        </tr>
+        <tr>
+            <th>活动状态</th>
+            <td>
+                <select name="status" class="easyui-combobox">
+                    <option value="0">关闭</option>
+                    <option value="1">开启</option>
+                </select>
+            </td>
+        </tr>
+    </thead>
+</table>
+<div id="dlg-buttons-add" style="text-align:center;padding:5px">
+    <a class="easyui-linkbutton" iconCls="icon-ok" onclick="javascript:;save()">确定</a>
+    <a class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:window.parent.location.reload();">取消</a>
+</div>
+{{ html.endForm() | raw }}
+<div id="add_prize" title="添加奖品" class="easyui-dialog" style="width:700px;height:auto;padding:10px 20px" modal="true" closed="true" buttons="#dlg-buttons-choose">
+    <table cellspacing="10" id="prizeInfo">
+        <tr>
+            <th>选择条件</th>
+            <td>
+                <select class="easyui-combobox" id="condition">
+                    <option value="0">无</option>
+                    <option value="1">会员等级</option>
+                </select>
+                <select class="easyui-combobox" id="condition1">
+                    <option value="1">伙购新兵</option>
+                    <option value="2">伙购少将</option>
+                    <option value="3">伙购中奖</option>
+                    <option value="4">伙购上奖</option>
+                    <option value="5">伙购大奖</option>
+                    <option value="6">伙购元帅</option>
+                </select>
+                <select class="easyui-combobox" id="condition2">
+                    <option value="1">伙购新兵</option>
+                    <option value="2">伙购少将</option>
+                    <option value="3">伙购中奖</option>
+                    <option value="4">伙购上奖</option>
+                    <option value="5">伙购大奖</option>
+                    <option value="6">伙购元帅</option>
+                    <option value="0">所有</option>
+                </select>
+            </td>
+            <td>后面不填为会员等级为前一等级之后所有等级</td>
+        </tr>
+        <tr>
+            <th>充值</th>
+            <td>
+                <input type="text" class="easyui-textbox" id="min" size="10">元 到 
+                <input type="text" class="easyui-textbox" id="max" size="10">元
+            </td>
+            <td>后面不填为充值金额大于前一个数字</td>
+        </tr>
+        <tr>
+            <th>奖品名称</th>
+            <td><input type="text" class="easyui-textbox" id="prizename"></td>
+            <td></td>
+        </tr>
+        <tr>
+            <th>内容</th>
+            <td>
+                <ul id="prizes" style="list-style: none;padding: 0">
+                    <li id="prize_info"></li>
+                    <li>
+                        <select id="packet">
+                            {% for item in packets %}
+                                <option value="{{ item.id }}">{{ item.name }}</option>
+                            {% endfor %}                                
+                        </select> 
+                        <input type="button" class="easyui-linkbutton" value="确定" style="padding: 2px 5px" id="confirm">
+                    </li>
+                </ul>
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            <th>送出时间</th>
+            <td>
+                <select class="easyui-combobox" id="givetime">
+                    <option value="0">即时</option>
+                    <option value="1">一天后</option>
+                    <option value="2">三天后</option>
+                    <option value="3">一周后</option>
+                    <option value="4">两周后</option>
+                    <option value="5">三周后</option>
+                    <option value="6">四周后</option>
+                    <option value="7">五周后</option>
+                </select>
+            </td>
+        </tr>
+    </table>
+    <div id="dlg-buttons-choose" style="text-align:center;padding:5px">
+        <a class="easyui-linkbutton" iconCls="icon-ok" onclick="choose()">确定</a>
+        <a class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#add_prize').dialog('close')">取消</a>
+    </div>
+</div>
+{% endblock %}
+{% block js %}
+<script type="text/javascript">
+    $(function(){
+        $("#confirm").click(function(){
+            $.get("/packet/info",{id:$("#packet").val()},function(data){
+                var html = '';
+                html += '<div style="width:200px;height:80px;border:1px solid #dedede;float:left;padding:10px">';
+                html += '<div style="margin-bottom:30px;">';
+                html += data.info.name;
+                html += '</div>';
+                $.each(data.info.content,function(i, v) {
+                    $.each(data.list,function(k,j){
+                        if (i == j.id) {
+                            html += j.name + ' X ' + v + "<br/><br/>";
+                        }
+                    })
+                });
+                html += '</div>';
+                html += '<div style="height:100px;margin-left:10px;line-height:100px;float:left">删除</div>';
+                $("#prize_info").attr('pid',$("#packet").val()).html(html);
+                $("#prizes li div:last").click(function(){
+                    $("#prize_info").html('');
+                })
+            },'json')
+        })
+    })
+
+    function choose(){
+        var html = '';
+        html += '<li>';
+        html += '<input type="hidden" name="condition[]" value="'+$("#condition").val()+'">';
+        html += '<input type="hidden" name="condition1[]" value="'+$("#condition1").val()+'">';
+        html += '<input type="hidden" name="condition2[]" value="'+$("#condition2").val()+'">';
+        html += '<input type="hidden" name="min[]" value="'+$("#min").val()+'">';
+        html += '<input type="hidden" name="max[]" value="'+$("#max").val()+'">';
+        html += '<input type="hidden" name="packets[]" value="'+$("#prize_info").attr('pid')+'">';
+        html += '<input type="hidden" name="prizename[]" value="'+$("#prizename").val()+'">';
+        html += '<input type="hidden" name="givetime[]" value="'+$("#givetime").val()+'">';
+        html += '<span>'+$("#prizename").val()+'</span><span style="margin-left:10px;cursor:pointer">删除</span>';
+        html += '</li>';
+        $("#prizeList").append(html);
+        $("#prizeList li span:last").click(function(){
+            $(this).parent().remove();
+        })
+    }
+
+    function save(){
+        $("#addForm").form('submit',{
+            success:function(data){
+                data = eval("(" + data + ")");
+                if (data.code == 100) {
+                    $.messager.alert('保存成功', '保存成功', 'success');
+                    window.parent.location.reload();
+                }else{
+                    $.messager.alert('保存失败', '保存失败', 'fail');
+                }
+            }
+        })
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,415 @@
+{% extends '@app/views/base.html' %}
+
+{% block css %}
+<style>
+    td {
+        border: 1px solid #C1DAD7;
+        background: #fff;
+        font-size:11px;
+        padding: 6px 6px 6px 12px;
+        color: #4f6b72;
+    }
+    td label{background-color:#dddddd; width:100px;height: 35px; border-collapse: collapse;}
+    td .alt {
+        background: #F5FAFA;
+        color: #797268;
+    }
+    .box span{font-size: 12px;padding: 6px 6px 6px 12px;color: #4f6b72;}
+    .good{ border-collapse: collapse;}
+    .panel-body div{ padding: 10px 0;}
+
+</style>
+{% endblock %}
+
+{% block main %}
+<div title="Basic Window"  style="padding:5px;height:auto" class="box">
+    <div style="padding: 10px 0;">
+        <span>订单状态：{{ status.name }}</span><span>订单编号：{% if(detail.is_exchange) %}{{ detail.is_exchange }}{% else %}{{ detail.id }}{% endif %}</span><span>伙购时间：{{ periodInfo.end_time }}</span><span>订单生成时间：{{ detail.create_time|date('Y-m-d H:i:s') }}</span>
+    </div>
+
+    <table class="good">
+        <tr>
+            <td>商品图片</td>
+            <td>商品名称</td>
+            <td>商品编码</td>
+            <td>商品品牌</td>
+            <td>伙购价</td>
+            <td>数量</td>
+            <td>中奖来源</td>
+            <td>购买次数</td>
+            <td>福分抵扣</td>
+            <td>实际购买金额</td>
+        </tr>
+
+        <tr>
+            <td><img src="{{ goodInfo.picture }}"></td>
+            <td>{{ goodInfo.name }}</td>
+            <td>{{ goodInfo.bn }}</td>
+            <td>{{ goodInfo.brand_id }}</td>
+            <td>￥{{ goodInfo.price }}</td>
+            <td>1</td>
+            <td>{{ periodTable.source.name }}</td>
+            <td>{{ consume.total }}次</td>
+            <td>{{ consume.point/100 }}元({{ consume.point }}福分)</td>
+            <td>{{ consume.money }}元</td>
+        </tr>
+    </table>
+    <table style="display: none"  cellpadding="5">
+        <tr>
+            <td><label>订单号：</label>{{ detail.id }}</td>
+            <td>商品名称：{{ goodInfo.name }}</td>
+            <td>状态：{{ status.name }}</td>
+        </tr>
+
+        <tr>
+            <td>商品分类：{{ catName[periodInfo.cat_id] }}</td>
+            <td>发货方式：</td>
+            <td>商品价格：￥{{ goodInfo.price }}</td>
+        </tr>
+
+        <tr>
+            <td>伙购码：{{ periodInfo.lucky_code }}</td>
+            <td>会员：{{ detail.user_id.username }}</td>
+            <td>伙购时间：{{ periodTable.buy_time }}</td>
+        </tr>
+
+        <tr>
+            <td>当期购买次数：{{ consume.total }}次</td>
+            <td>实际购买金额：{{ consume.money }}元</td>
+            <td>支付福分：{{ consume.point }}</td>
+        </tr>
+
+        <tr>
+            <td>来源：{{ periodTable.source.name }}</td>
+            <td></td>
+            <td></td>
+        </tr>
+
+    </table>
+</div>
+
+<div style="width:auto;height:auto;">
+    {% if(detail.status >= 0) %}
+    <div title="收货地址" style="padding:10px" id="address" class="easyui-dialog" data-options="closed:true,modal:true"  >
+        <iframe id="address-info" frameborder="0" style="width: 500px;height: 300px;" scrolling="no"></iframe>
+    </div>
+    {% endif %}
+
+    {% if(detail.status > 1) %}
+    <div title="备货信息" style="padding:10px" class="easyui-dialog" data-options="closed:true,modal:true" id="deliver">
+        <iframe id="deliver-info" frameborder="0" style="width: 400px;height: 400px;" scrolling="no"></iframe>
+    </div>
+    {% endif %}
+
+    {% if(detail.status > 2) %}
+    <div title="发货信息" style="padding:10px" class="easyui-dialog" data-options="closed:true,modal:true" id="send">
+        <iframe id="send-info" frameborder="0" style="width: 400px;height: 300px;"  scrolling="no"></iframe>
+    </div>
+    {% endif %}
+
+    <div title="备注" style="padding: 10px;font-size: 13px;">
+        {% if(remarkArr) %}
+        <table>
+            <tr><td>备注内容</td></tr>
+            {% for item in remarkArr  %}
+            <tr><td>{{ item }}</td></tr>
+            {% endfor %}
+        </table>
+        {% endif %}
+        {% if(detail.status == 6) %}<br />异常备注：{{ detail.fail_id }}{% endif %}
+    </div>
+</div>
+{% if goodInfo.delivery_id != 3 %}
+    {% if((detail.status >= 1 and detail.status != 6) or (detail.before_status >= 1 and detail.before_status != 10)) %}
+    <div class="easyui-tabs" style="width:1000px;height:auto;font-size: 14px;">
+            <div title="收货地址" style="padding:10px">
+                {% if(virtual) %}
+                <div>收货人：{{ virtual.account }} | {{virtual.name}}</div>
+                <div>虚拟物品：{{ virtual.type }}</div>
+                {% else %}
+                <div>收货人：{{ detail.ship_name }}</div>
+                <div>联系方式：{{ detail.ship_mobile }}</div>
+                <div>收货地址：{{ detail.ship_area }}{{ detail.ship_addr }}</div>
+                <div>配送时间：{{ detail.ship_time }}</div>
+                <div>备注信息：{{ detail.mark_text }}</div>
+                {% endif %}
+                <div>提交时间：{{ detail.confirm_addr_time|date('Y-m-d H:i:s') }}</div>
+                <br />
+                {% if detail.status > 1 %}
+                <div>确认人：{{ person[deliverInfo.confirm_userid] }}</div>
+                <div>确认时间：{{ deliverInfo.confirm_time|date('Y-m-d H:i:s') }}</div>
+                {% endif %}
+            </div>
+
+        {% if((detail.status >= 3 and detail.status != 6) or (detail.before_status >= 3 and detail.before_status != 10)) %}
+            <div title="备货信息" style="padding:10px">
+                <div>
+                    <div>发货方式：{{ deliverInfo.send }}</div>
+                    <div>备货平台：{{ deliverInfo.platform }}</div>
+                    <div>成本：{{ deliverInfo.price }}</div>
+                    <div>第三方订单号：{{ deliverInfo.third_order }}</div>
+                    <div>发票：{{ deliverInfo.bill }}</div>
+                    <div>发票号：{{ deliverInfo.bill_order }}</div>
+                    <div>规格：{{ deliverInfo.standard }}</div>
+                    <div>备注：{{ deliverInfo.mark_text }}</div>
+                    <br />
+                    <div>备货人：{{ person[deliverInfo.prepare_userid] }}</div>
+                    <div>备货时间：{{ deliverInfo.prepare_time|date('Y-m-d H:i:s') }}</div>
+                </div>
+            </div>
+        {% endif %}
+
+        {% if(detail.status >= 4 and detail.status != 6) or (detail.before_status >= 4 and detail.before_status != 10) %}
+        <div title="发货信息" style="padding:10px">
+            <div>
+                <div>快递公司：{{ deliverInfo.deliver_company }}</div>
+                <div>快递订单号：{{ deliverInfo.deliver_order }}</div>
+                <div>快递费用：{{ deliverInfo.deliver_cost }}</div>
+                <br />
+                <div>发货人：{{ person[deliverInfo.prepare_userid] }}</div>
+                <div>发货时间：{{ deliverInfo.deliver_time|date('Y-m-d H:i:s') }}</div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if(detail.status == 8) %}
+        <div title="晒单信息" style="padding:10px;font-size:14px;">
+            <table cellpadding="5" style="border-collapse: collapse;">
+                <tr>
+                    <td width="100">晒单时间：</td><td>{{ shareTopic.created_at|date('Y-m-d H:i:s') }}</td>
+                </tr>
+                <tr>
+                    <td>晒单图片：</td><td>{% for item in shareImg %}
+                    <img src="{{ item.basename }}" width="200px" height="200px">
+                    {% endfor %}</td>
+                </tr>
+                <tr>
+                    <td>获奖感言：</td><td>{{ shareTopic.content }}</td>
+                </tr>
+                <tr>
+                    <td>奖励积分：</td><td>{{ shareTopic.point }}</td>
+                </tr>
+                <tr>
+                    <td>审核人：</td><td>{{ person[shareTopic.admin_id] }}</td>
+                </tr>
+                <tr>
+                    <td>审核时间：</td><td>{% if shareTopic.checked_at %}{{ shareTopic.checked_at|date('Y-m-d H:i:s') }}{% endif %}</td>
+                </tr>
+                <tr>
+                    <td>状态：</td><td>{% if shareTopic.is_pass == 1 %}已通过{% elseif shareTopic.is_pass == 0 %}待审核{% elseif shareTopic.is_pass == 2 %}未通过{% endif %}</td>
+                </tr>
+                <tr>
+                    <td>推荐：</td><td>{% if(shareTopic.is_recommend) %}是{% else %}否{% endif %}  </td>
+                </tr>
+                <tr>
+                    <td>精华：</td><td>{% if(shareTopic.is_digest) %}是{% else %}否{% endif %}</td>
+                </tr>
+            </table>
+        </div>
+        {% endif %}
+        {% if exchange %}
+        <div title="换货信息" style="padding:10px">
+            <table cellpadding="10" border="0" cellspacing="1">
+                <tr>
+                    <td>原单号</td><td>{{ exchange.id }}</td>
+                    <td>确认人</td><td>{{ person[exchange.confirm_userid] }}</td>
+                    <td>确认时间</td><td>{{ exchange.confirm_time|date('Y-m-d H:i:s') }}</td>
+                </tr>
+                <tr>
+                    <td>发货方式</td><td>{{ exchange.send }}</td>
+                    <td>备货平台</td><td>{{ exchange.platform }}</td>
+                    <td>采购价格</td><td>{{ exchange.price }}</td>
+                </tr>
+                <tr>
+                    <td>第三方订单号</td><td>{{ exchange.third_order }}</td>
+                    <td>规格</td><td>{{ exchange.standard }}</td>
+                    <td>发票</td><td>{{ exchange.bill }}</td>
+                </tr>
+                <tr>
+                    <td>发票号</td><td>{{ exchange.bill_order }}</td>
+                    <td>备货人</td><td>{{ person[exchange.prepare_userid] }}</td>
+                    <td>备货时间</td><td>{{ exchange.prepare_time|date('Y-m-d H:i:s') }}</td>
+                </tr>
+                <tr>
+                    <td>快递公司</td><td>{{ exchange.deliver_company }}</td>
+                    <td>快递单号</td><td>{{ exchange.deliver_order }}</td>
+                    <td>快递费</td><td>{{ exchange.deliver_cost }}</td>
+                </tr>
+                <tr>
+                    <td>发货人</td><td>{{ person[exchange.deliver_userid] }}</td>
+                    <td>发货时间</td><td>{{ exchange.deliver_time|date('Y-m-d H:i:s') }}</td>
+                    <td></td><td></td>
+                </tr>
+                <tr>
+                    <td>新单号</td><td>{{ deliverInfo.id }}</td>
+                    <td>换货人</td><td>{{ person[deliverInfo.admin_id] }}</td>
+                    <td>换货时间</td><td>{{ deliverInfo.created_time|date('Y-m-d H:i:s') }}</td>
+                </tr>
+            </table>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+{% endif %}
+<br />
+
+{% if goodInfo.delivery_id != 3 %}
+   <!-- {% if(detail.status == 0 and priv.address == 1 ) %}
+    <a href="javascript:void(0)" class="easyui-linkbutton get-status" data-id="all" id="address-show">填写收货地址</a>
+    {% endif %}-->
+    {% if(detail.status == 2 and priv.deliver == 1) %}
+    <a href="javascript:void(0)" class="easyui-linkbutton get-status" data-id="all" id="deliver-show">备货</a>
+    {% endif %}
+    {% if(detail.status == 3 and priv.send == 1) %}
+    <a href="javascript:void(0)" class="easyui-linkbutton get-status" data-id="all" id="send-show">发货</a>
+    {% endif %}
+
+    {% if(detail.status == 1 and priv.confirm == 1 and priv.refuse == 1) %}
+        <a href="javascript:void(0)" class="easyui-linkbutton get-status" data-id="all" id="comfirm">确认</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton get-status" data-id="all" onclick="refuse()">驳回</a>
+    {% endif %}
+
+    {% if(detail.status == 4) %}
+        {% if(detail.is_exchange == 0 and priv.exchange == 1) %}
+            <a href="javascript:void(0)" class="easyui-linkbutton get-status" data-id="all" onclick="change()">申请换货</a>
+        {% endif %}
+    {% endif %}
+
+    {% if(detail.status >= 3 and detail.status != 6 and priv.modify == 1) %}
+    <a href="javascript:void(0)" class="easyui-linkbutton get-status" data-id="all" onclick="editOrder()">修改订单</a>
+    {% endif %}
+{% endif %}
+<a href="javascript:void(0)" class="easyui-linkbutton" onclick="javascript:$('#dlg-remark').window('open');;">添加备注</a>
+
+<div id="dlg-buttons-remark" style="text-align:center;padding:5px">
+    <a class="easyui-linkbutton" iconCls="icon-ok" onclick="saveRemark()">确定</a>
+    <a class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg-remark').dialog('close')">取消</a>
+</div>
+
+<div id="dlg-refuse" title="驳回理由" class="easyui-dialog" style="width:320px;height:auto;padding:10px 20px" data-options="closed:true,modal:true" buttons="#dlg-buttons-add">
+    <textarea data-options="required:true" class="easyui-textarea" rows="6" cols="34" id="fail"></textarea>
+</div>
+
+<div id="dlg-buttons-add" style="text-align:center;padding:5px">
+    <a class="easyui-linkbutton" iconCls="icon-ok" onclick="save()">确定</a>
+    <a class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg-refuse').dialog('close')">取消</a>
+</div>
+
+<div class="easyui-window" data-options="closed:true,modal:true" id="change" title="申请换货" style="text-align:center;padding:15px 5px 5px 5px;width:200px;height: 100px;">
+    <a class="easyui-linkbutton" iconCls="icon-ok" onclick="change()">通过</a>
+    <a class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#change').dialog('close')">取消</a>
+</div>
+
+<div class="easyui-window" data-options="closed:true," id="orderInfo" title="修改订单信息">
+    <iframe id="order-info" frameborder="0" style="width: 670px;height: 400px;" scrolling="no"></iframe>
+</div>
+
+<div id="dlg-remark" title="添加备注" class="easyui-dialog" style="width:320px;height:auto;padding:10px 20px" closed="true" buttons="#dlg-buttons-remark">
+    <textarea data-options="required:true" class="easyui-textarea" rows="10" cols="34" id="remark">{{ detail.remark }}</textarea>
+</div>
+
+<div class="easyui-window" data-options="closed:true," id="dlg-view" title="兑换">
+    <iframe id="duiba" frameborder="0" style="width: 670px;height: 400px;" scrolling="no"></iframe>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+    var status = "{{ detail.status }}";
+    var id = "{{ detail.id }}";
+    var exchange = "{{ detail.is_exchange }}";
+
+    $('#address-show').click(function(){
+        $('#address-info').prop('src',  '/win/address?id=' + id);
+        $('#address').window('open');
+    })
+
+    $('#deliver-show').click(function(){
+        if(exchange != 0) $('#deliver-info').prop('src',  '/win/deliver?id=' + id + '&exchange='+exchange+'&type=special');
+        else $('#deliver-info').prop('src',  '/win/deliver?id=' + id+'&type=special');
+        $('#deliver').window('open');
+    })
+
+    $('#send-show').click(function(){
+        if(exchange != 0) $('#send-info').prop('src',  '/win/send?id=' + id + '&exchange='+exchange);
+        else $('#send-info').prop('src',  '/win/send?id=' + id);
+        $('#send').window('open');
+    })
+
+    function change(){
+        $.messager.confirm('Confirm', '您确定同意换货吗？', function(r) {
+            if (r) {
+                $.post('/win/change-status', {'id':id}, function(data){
+                    if(data.error == 0){
+                        $.messager.alert('成功', '操作成功');
+                        setTimeout(function(){window.location.reload()}, 2000);
+                    }else{
+                        $.messager.alert('错误', '操作失败', 'error');
+                        return false;
+                    }
+                })
+            }
+        })
+    }
+
+    function editOrder(){
+        $('#orderInfo').window('open');
+        if(exchange != 0){
+            $('#order-info').prop('src',  '/win/modify?id=' + id+'&exchange='+exchange);
+        }else{
+            $('#order-info').prop('src',  '/win/modify?id=' + id);
+        }
+    }
+
+    var id = "{{ detail.id }}";
+    function saveRemark(){
+        var remark = $('#remark').val();
+        $.post('/order/remark', {'id':id, 'remark':remark}, function(data){
+            if(data == 1){
+                $.messager.alert('成功', '添加成功');
+                setTimeout(function(){window.location.reload()}, 2000);
+            }else{
+                $.messager.alert('错误', '添加失败', 'error');
+                return false;
+            }
+        })
+    }
+
+    function refuse(){
+        $('#dlg-refuse').window('open');
+    }
+
+    function save(){
+        var content = $('#fail').val();
+        var id = "{{ detail.id }}"
+        $.post('/win/refuse?id='+id, {'confirm_reason':content}, function(data){
+            //data = eval('(' + data + ')');
+            if(data.error == 0){
+                $.messager.alert('成功', data.message);
+                setTimeout(function(){window.parent.window.load();window.parent.window.reloadgrid();}, 2000);
+            }else{
+                $.messager.alert(data.message);
+                return false;
+            }
+        })
+    }
+
+    $('#comfirm').click(function(){
+        var id = "{{ detail.id }}";
+        $.post('{{ url(['/order/confirm-order']) }}', {id: id}, function (data) {
+            if(data == 1){
+                $.messager.alert('失败', '确认失败');
+                return false;
+            }else{
+                $.messager.alert('成功', '确认成功');
+                setTimeout(function(){
+                    window.parent.window.load();
+                    window.parent.window.reloadgrid();
+                }, 2000);
+            }
+        })
+    })
+
+</script>
+
+{% endblock %}

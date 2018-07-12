@@ -1,0 +1,156 @@
+<link rel="stylesheet" type="text/css" href="{{ app.params.skinUrl }}/js/jquery-easyui-1.4.4/themes/default/easyui.css">
+<link rel="stylesheet" type="text/css" href="{{ app.params.skinUrl }}/js/jquery-easyui-1.4.4/themes/icon.css">
+
+<script src="{{ app.params.skinUrl }}/js/jquery-easyui-1.4.4/jquery.min.js" type="text/javascript"></script>
+<script src="{{ app.params.skinUrl }}/js/jquery-easyui-1.4.4/jquery.easyui.min.js" type="text/javascript"></script>
+<script src="{{ app.params.skinUrl }}/js/jquery-easyui-1.4.4/locale/easyui-lang-zh_CN.js" type="text/javascript"></script>
+
+<div title="Basic Window"  style="padding:5px;height:auto;width:100%" class="box">
+    {% if(model.status == 3) %}
+    {{ html.beginForm('', 'post', {'class':'am-form am-form-horizontal', 'id':'send-form'}) | raw }}
+    {% if orderModel.send == 5 or orderModel.send == 6 or orderModel.send == 7 or orderModel.send == 8 or orderModel.send == 3%}
+    <table cellpadding="10">
+        {% for items in orderlist %}
+        <tr>
+            <td>
+            {% if items.audit_status == 0 %}
+                <input class="easyui-checkbox" type="checkbox" name="orders[]" value="{{ items.orderid }}">
+            {% endif %}
+            </td>
+            <td>{{ items.orderid }}  ({{ items.money }}元){% if items.audit_status== 1 %}通过{% elseif items.audit_status == 2 %}未通过{% endif %}</td>
+        </tr>
+        {% endfor %}
+        <tr>
+            <td></td>
+            <td>
+                <input type="button" value="通过审核" id="pass">
+                <input type="button" value="审核不通过" id="refuse">
+            </td>
+        </tr> 
+        <tr>
+            <td></td>
+            <td>
+                <input type="submit" class="easyui-linkbutton">
+            </td>
+        </tr>
+    </table>
+    {% elseif orderModel.send == 13 or orderModel.send == 18%}
+    <table cellpadding="10">
+        <tr>
+            <td>面值</td>
+            <td><input class="easyui-textbox" type="text" name="par_value" data-options="required:true"></td>
+        </tr>
+        <tr>
+            <td>卡号</td>
+            <td><input class="easyui-textbox" type="text" name="card" data-options="required:true"></td>
+        </tr>
+        <tr>
+            <td>密码</td>
+            <td><input class="easyui-textbox" type="text" name="pwd" data-options="required:true"></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>
+                <input type="submit" class="easyui-linkbutton">
+            </td>
+        </tr>
+    </table>
+    {% else %}
+    <table cellpadding="10">
+        <tr>
+            <td>快递公司</td>
+            <td>
+                <select name="company" data-options="required:true" class="easyui-combobox">
+                    {% for key,item in express %}
+                    <option name="{{ key }}">{{ key }}</option>
+                    {% endfor %}
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>快递订单号</td>
+            <td><input class="easyui-textbox" type="text" name="orderNo" data-options="required:true"></td>
+        </tr>
+        <tr>
+            <td>快递费用</td>
+            <td><input class="easyui-textbox" type="text" name="cost"></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>
+                <input type="submit" class="easyui-linkbutton">
+            </td>
+        </tr>
+    </table>
+    {% endif %}
+    {{ html.endForm() | raw }}
+    {% endif %}
+</div>
+
+<script>
+    $(function(){
+        var form = 'send-form';
+        id = "{{ model.id }}";
+        var exId = "{{ model.is_exchange }}";
+        if(exId != 0){
+            var url = '/win/send?id='+id+'&exchange='+exId;
+        } else{
+            var url = '/win/send?id='+id;
+        }
+
+        $("#pass").click(function(){
+            var orderList = $("input[type=checkbox]:checked");
+            var orders = '';
+            if (orderList.length > 0) {
+                for (var i = 0; i < orderList.length; i++) {
+                    orders += orderList[i].value+',';
+                }
+                $("input[type=checkbox]:checked").remove();
+                orders = orders.substring(0,(orders.length-1));
+                $.get('audit',{type:'pass',orders:orders},function(aduit){
+                    if (aduit.code == 100) {
+                        $.messager.alert('成功','审核成功');
+                    }else{
+                        $.messager.alert('失败','审核失败');
+                    }
+                },'json');
+            }
+        })
+
+        $("#refuse").click(function(){
+            var orderList = $("input[type=checkbox]:checked");
+            var orders = '';
+            if (orderList.length > 0) {
+                for (var i = 0; i < orderList.length; i++) {
+                    orders += orderList[i].value+',';
+                    $("input[type=checkbox]:checked").eq(i).remove();
+                }
+                orders = orders.substring(0,(orders.length-1));
+                $.get('audit',{type:'refuse',orders:orders},function(aduit){
+                    if (aduit.code == 100) {
+                        $.messager.alert('成功','审核成功');
+                    }else{
+                        $.messager.alert('失败','审核失败');
+                    }
+                },'json');
+            }
+        })
+
+        $('#' + form).form({
+            url: url,
+            onSubmit:function(){
+                return $(this).form('enableValidation').form('validate');
+            },
+            success: function (data) {
+                var data = eval('('+data+')');
+                if (data.error == 0) {
+                    $.messager.alert('成功', data.message);
+                    setTimeout(function(){location.reload();parent.location.reload()}, 2000);
+                } else {
+                    $.messager.alert('失败', data.message, 'error');
+                }
+            }
+        });
+        // $('#' + form).submit();
+    })
+</script>

@@ -1,0 +1,73 @@
+{% extends '@app/views/base.html' %}
+  
+{% block main %}
+
+{% if type != 4 %}
+<table id="listdata" class="easyui-datagrid" title="任务列表" data-options="toolbar:'#tb-user',singleSelect:false,pagination:true,method:'get',url:'{{  url('user-task/list', {'type': type})}}',pageSize: 20">
+    <thead>
+    <tr>
+        <th data-options="field:'date', width:200, align:'center'">时间</th>
+        <th data-options="field:'count', width:200, align:'center'">参与人数</th>
+    </tr>
+    </thead>
+</table>
+<div id="tb-user" style="height:auto">
+    <div>
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-edit',plain:true" onclick="view()">查看详情</a>
+    </div>
+</div>
+{% else %}
+<div class="easyui-tabs" style="padding:10px;height: 750px;" id="view_tabs">
+    <div title="称号" style="padding:10px;" >
+        <iframe width="100%" height="100%" frameborder="0" id="glory_iframe" src="{{ url('user-task/glory-list') }}"></iframe>
+    </div>
+    <div title="等级" style="padding:10px;">
+        <iframe width="100%" height="100%" frameborder="0" id="level_iframe"></iframe>
+    </div>
+    <div title="充值" style="padding:10px;">
+        <iframe width="100%" height="100%" frameborder="0" id="grow_iframe"></iframe>
+    </div>
+</div>
+{% endif %}
+
+<div id="dlg-view" class="easyui-window" title="查看详情" style="width:1242px;height:600px;padding:10px;overflow:hidden;" data-options="
+            iconCls:'icon-save',
+            closed:true,
+            modal:true,
+            onResize:function(){
+                $(this).window('hcenter');
+            }">
+    <iframe width="100%" height="100%" frameborder="0" id="view_iframe">
+    </iframe>
+</div>
+
+{% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+    function view() {
+        var selRow = $('#listdata').datagrid('getSelected');
+        if (!selRow) {
+            $.messager.alert('错误','请选择一行');
+            return false;
+        }
+        $('#view_iframe').prop('src', "{{ url('user-task/detail') }}"+'?date='+selRow.date+'&type='+selRow.type+'&level='+selRow.level+'&cate='+selRow.cate+'&num='+selRow.num);
+        $('#dlg-view').window('open');
+    }
+
+    $('#view_tabs').tabs({
+        onSelect: function(title, index){
+            switch (title) {
+                case '称号':
+                    break;
+                case '等级':
+                    $('#level_iframe').prop('src', "{{ url('user-task/level-list') }}");
+                    break;
+                case '充值':
+                    $('#grow_iframe').prop('src', "{{ url('user-task/grow-list') }}");
+                    break;
+            }
+        }
+    });
+</script>
+{% endblock %}

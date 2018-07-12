@@ -1,0 +1,115 @@
+{% extends '@app/views/base.html' %}
+
+{% block main %}
+<table id="listdata"  class="easyui-datagrid" title="话题列表" data-options="toolbar:'#tb-user',singleSelect:true,pagination:true,method:'get',url:'{{  url('group/comment')}}'">
+    <thead>
+    <tr>
+        <th data-options="field:'id', width:50, align:'center'">ID</th>
+        <th data-options="field:'content', width:500, align:'center'">内容</th>
+        <th data-options="field:'username', width:150, align:'center'" formatter="formatUsername">用户</th>
+        <th data-options="field:'status', width:100, align:'center'" formatter="formatStatus">状态</th>
+        <th data-options="field:'created_at', width:150, align:'center'">时间</th>
+    </tr>
+    </thead>
+</table>
+
+<div id="tb-user" style="height:auto">
+    <div>
+        {% if verify == 1 %}
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-edit',plain:true" onclick="verify()">审核</a>
+        {% endif %}
+        {% if del_comment == 1 %}
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-cancel',plain:true" onclick="del()">删除</a>
+        {% endif %}
+    </div>
+</div>
+
+<div id="dlg_verify" class="easyui-window" title="审核" data-options="closed:true,modal:true" style="width:400px;height:200px;padding:10px" >
+    <table cellpadding="5">
+        <tr>
+            <td style="width: 100px">审核</td>
+            <td>
+                <select class="easyui-combobox" name="status" id="status" data-options="panelHeight:'auto'">
+                    <option value="1">通过</option>
+                    <option value="0">不通过</option>
+                </select>
+            </td>
+        </tr>
+    </table>
+    <div style="text-align:center;padding:5px;margin-top:20px;">
+        <a class="easyui-linkbutton" iconCls="icon-ok" onclick="save()">确定</a>
+        <a class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg_verify').dialog('close')">取消</a>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block js %}
+<script>
+    function save(){
+        var selRow = $('#listdata').datagrid('getSelected');
+        var status = $('#status').combobox('getValue');
+        $.get('/group/verify-comment', {'id':selRow.id, 'status':status}, function(data){
+            if (data == 1) {
+                $.messager.alert('成功', '审核成功');
+                setTimeout(function(){location.reload();}, 2000);
+            } else {
+                $.messager.alert('错误', '审核失败', 'error');
+            }
+        })
+    }
+
+    function verify(){
+        var selRow = $('#listdata').datagrid('getSelected');
+        if (!selRow) {
+            $.messager.alert('错误','请选择一个话题');
+            return false;
+        }
+        if (selRow.status != 0) {
+            $.messager.alert('错误','请选择待审核回帖');
+            return false;
+        }
+        $('#dlg_verify').window('open');
+    }
+
+    function del(){
+        var selRow = $('#listdata').datagrid('getSelected');
+        if (!selRow) {
+            $.messager.alert('错误','请选择一个回帖');
+            return false;
+        }
+
+        $.messager.confirm('Confirm', '您确定删除该回帖吗？', function(r) {
+            if (r) {
+                $.post("{{ url('group/del-comment') }}", {'id':selRow.id}, function(data) {
+                    if (data == 0) {
+                        $.messager.alert('错误', '删除失败');
+                    } else {
+                        $.messager.alert('成功', '删除成功');
+                        setTimeout(function(){location.reload();}, 2000);
+                    }
+                }, 'json');
+            }
+        });
+    }
+
+
+    function formatUsername(val, row){
+        result = '';
+
+        if (row.phone) {
+            result += '手机号：' + row.phone + '<br />';
+        }
+        if (row.email) {
+            result += '邮箱：' + row.email;
+        }
+
+        return result;
+    }
+    function formatStatus(val, row){
+        if(val == 0) return '<span color="red">待审核</span>';
+        else if(val == 1) return '通过';
+        else if(val == 2) return '不通过';
+    }
+</script>
+{% endblock %}

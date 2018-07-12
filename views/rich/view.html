@@ -1,0 +1,25 @@
+{% extends '@app/views/base.html' %}
+
+{% block main %}
+<table title="土豪列表" id="listdata" class="easyui-datagrid" data-options="toolbar:'#tb-user',rownumbers:true,singleSelect:true,pagination:true,method:'get',url:'{{ url('/rich/view', {'id':id}) }}',rownumbers: false">
+    <thead>
+    <tr>
+        <th data-options="field:'datetime', align:'center'" width="150">日期</th>
+        <th data-options="field:'rank', align:'center'" width="150">排名</th>
+        <th data-options="field:'user_id', align:'center'" width="150" formatter="formatName">用户名</th>
+        <th data-options="field:'money', align:'center'" width="150">消费金额</th>
+    </tr>
+    </thead>
+</table>
+{% endblock %}
+
+{% block js %}
+<script>
+    function formatName(val, row)
+    {
+        if(val.phone == null) val.phone = '';
+        if(val.email == null) val.email = '';
+        return val.phone + '<br />' + val.email;
+    }
+</script>
+{% endblock %}

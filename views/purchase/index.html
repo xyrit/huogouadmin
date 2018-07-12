@@ -1,0 +1,155 @@
+{% extends '@app/views/base.html' %}
+
+{% block main %}
+
+<div class="search">
+    <span>订单编号
+        <input class="easyui-textbox" type="text" name="orderId" id="orderId">
+    </span>
+    <span>创建人
+        <select class="easyui-combobox" id="adminId" editable="true" style="width:100px;" data-options="url: '{{ url('/employee/list') }}', valueField: 'id', textField: 'name'"></select>
+    </span>
+    <span>创建时间
+        <input class="easyui-datetimebox" style="width:200px" name="startTime" id="startTime"> 到
+        <input class="easyui-datetimebox" style="width:200px" name="endTime" id="endTime">
+    </span>
+    <a href="javascript:void(0);" onclick="reloadgrid();" class="easyui-linkbutton" iconCls="icon-search">搜索</a>
+</div>
+
+<table id="listdata"  class="easyui-datagrid" title="采购订单列表" data-options="toolbar:'#tb-user',singleSelect:true,pagination:true,method:'get',url:'{{  url('purchase/index')}}',mode:'local',pageSize:20">
+    <thead>
+    <tr>
+        <th data-options="field:'id', width:150, align:'center'">订单编号</th>
+        <th data-options="field:'money', width:100, align:'center'">订单金额</th>
+        <th data-options="field:'admin_name', width:100, align:'center'">创建人</th>
+        <th data-options="field:'created_at', width:180, align:'center'" formatter="formatTime">创建时间</th>
+        <th data-options="field:'status', width:100, align:'center'" formatter="formatStatus">订单状态</th>
+        <th data-options="field:'approved_name', width:100, align:'center'">审核人</th>
+        <th data-options="field:'note', width:100, align:'center'">备注</th>
+    </tr>
+    </thead>
+</table>
+
+<div id="tb-user" style="height:auto">
+    <div>
+        {% if add == 1 %}
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true" onclick="add()">新增</a>
+        {% endif %}
+        {% if edit == 1 %}
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-edit',plain:true" onclick="edit()">编辑</a>
+        {% endif %}
+        {% if view == 1 %}
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-tip',plain:true" onclick="view()">详情</a>
+        {% endif %}
+        {% if del == 1 %}
+        <!--<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-no',plain:true" onclick="del()">删除</a>-->
+        {% endif %}
+    </div>
+</div>
+
+<div id="dlg-add" class="easyui-window" title="新增采购订单" style="width:1198px;height:750px;padding:10px;overflow:hidden;" data-options="
+            iconCls:'icon-save',
+            closed:true,
+            modal:true,
+            onResize:function(){
+                $(this).window('hcenter');
+            }">
+    <iframe width="100%" height="100%" frameborder="0" id="add_iframe">
+    </iframe>
+</div>
+
+<div id="dlg-edit" class="easyui-window" title="编辑采购订单" style="width:1198px;height:750px;padding:10px;overflow:hidden;" data-options="
+            iconCls:'icon-save',
+            closed:true,
+            modal:true,
+            onResize:function(){
+                $(this).window('hcenter');
+            }">
+    <iframe width="100%" height="100%" frameborder="0" id="edit_iframe">
+    </iframe>
+</div>
+
+<div id="dlg-view" class="easyui-window" title="采购订单详情" style="width:1198px;height:750px;padding:10px;overflow:hidden;" data-options="
+            iconCls:'icon-save',
+            closed:true,
+            modal:true,
+            onResize:function(){
+                $(this).window('hcenter');
+            }">
+    <iframe width="100%" height="100%" frameborder="0" id="view_iframe">
+    </iframe>
+</div>
+
+{% endblock %}
+
+{% block js %}
+<script>
+    function reloadgrid(){
+        var queryParams = $('#listdata').datagrid('options').queryParams;
+        queryParams.orderId = $('#orderId').val();
+        queryParams.adminId = $('#adminId').combobox('getValue');
+        queryParams.startTime = $('#startTime').datetimebox('getValue');
+        queryParams.endTime	= $('#endTime').datetimebox('getValue');
+        $('#listdata').datagrid('options').queryParams = queryParams;
+        $("#listdata").datagrid('reload');
+    }
+
+    function formatStatus(val, row) {
+        if (val == 0) {
+            return '提交待审';
+        } else if (val == 1) {
+            return '审核通过';
+        } else if (val == 2) {
+            return '审核不通过';
+        }
+    }
+
+    function add() {
+        $('#add_iframe').prop('src', "{{ url('purchase/add') }}");
+        $('#dlg-add').window('open');
+    }
+
+    function edit() {
+        var selRow = $('#listdata').datagrid('getSelected');
+        if (!selRow) {
+            $.messager.alert('错误','请选择一行');
+            return false;
+        }
+        $('#edit_iframe').prop('src', "{{ url('purchase/edit') }}" + '?id=' + selRow.id);
+        $('#dlg-edit').window('open');
+    }
+
+    function view() {
+        var selRow = $('#listdata').datagrid('getSelected');
+        if (!selRow) {
+            $.messager.alert('错误','请选择一行');
+            return false;
+        }
+        $('#view_iframe').prop('src', "{{ url('purchase/view') }}" + '?id=' + selRow.id);
+        $('#dlg-view').window('open');
+    }
+
+    function del() {
+        var selRow = $('#listdata').datagrid('getSelected');
+        if (!selRow) {
+            $.messager.alert('错误','请选择一行');
+            return false;
+        }
+
+        $.messager.confirm('Confirm', '确认删除吗?', function(r) {
+            if (r) {
+                $.post("{{ url('supplier/del') }}", {'id':selRow.id}, function(data) {
+                    if (data.error) {
+                        $.messager.alert('错误', data.message, 'error');
+                    } else {
+                        $.messager.alert('成功', data.message);
+                        reloadgrid();
+                    }
+                }, 'json');
+            }
+        });
+    }
+
+</script>
+{% endblock %}
+

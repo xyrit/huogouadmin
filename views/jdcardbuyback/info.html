@@ -1,0 +1,154 @@
+{% extends '@app/views/base.html' %}
+
+{% block main %}
+
+<style type="text/css">
+    .inputText {
+        border: 1px solid #95B8E7;
+        height: 24px;
+        line-height: 24px;
+        width: 140px;
+    }
+
+    .combo {
+        height: 24px !important;
+        line-height: 24px;
+    }
+
+    .desc_log span{ margin: 0 7px 0 0;}
+</style>
+
+<div class="easyui-panel" title="详情">
+    <div style="padding:10px 0 10px 60px">
+        {{ html.beginForm('', 'post', {'class':'am-form am-form-horizontal', 'id':'product-form'}) | raw }}
+        <table id="buyback">
+            <tr id="pay_typetr">
+                <td>支付类型:</td>
+                <td>
+                    <select name="buyback[pay_type]" class="pay_type" id="pay_type">
+                        {% for key,item in pay_type %}
+                        <option value="{{key}}">{{item}}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+            </tr>
+            <tr id="bank_name">
+                <td>开户行:</td>
+                <td><input class="easyui-validatebox inputText" type="text" name="buyback[bank_name]"></td>
+            </tr>
+
+            <tr id="pay_accounts">
+                <td>帐号:</td>
+                <td><input class="easyui-validatebox inputText" type="text" name="buyback[pay_accounts]"></td>
+            </tr>
+
+            <tr id="pay_name">
+                <td>用户名:</td>
+
+                <td><input class="easyui-validatebox inputText" type="text" name="buyback[pay_name]"></td>
+
+            </tr>
+            <tr id="rate">
+                <td>折扣:</td>
+
+                <td>
+                    <select name="buyback[rate]" id="val_rete" class="rate">
+                        <option value="97">97折</option>
+                        <option value="95">95折</option>
+                    </select></td>
+
+            </tr>
+            <tr id="pay_money">
+                <td>付款金额:</td>
+
+                <td><div id="face" style="display: none">{{face}}</div>
+                    <input class="easyui-validatebox inputText" type="text" id="val_pay_money" name="buyback[pay_money]"></td>
+
+            </tr>
+            <tr id="pay_no">
+                <td>交易订单号:</td>
+                <td><input class="easyui-validatebox inputText" type="text" name="buyback[pay_no]"></td>
+            </tr>
+            <tr id="pay_desc">
+                <td>备注:</td>
+                <td>
+                    <textarea data-options="required:true" class="easyui-textarea" name="buyback[pay_desc]" rows="6"
+                              cols="34" id="fail"></textarea>
+                </td>
+            </tr>
+            <tr id="submit">
+                <td>&nbsp;</td>
+                <td>
+                    <input class="easyui-validatebox inputText" type="hidden" name="buyback[id]" value="{{buyback.id}}">
+                    <input type="button" onclick="save()" class="am-btn am-btn-primary" value="确定">
+                </td>
+            </tr>
+
+        </table>
+        <div class="bzjl">
+            <p style="color: red">订单备注记录</p>
+            {% for key,item in desc_log %}
+            <p class="desc_log"><span>{{item.op_user}}</span><span>{{item.op_content}}</span><span>{{item.op_time}}</span></p>
+            {% endfor %}
+        </div>
+        {{ html.endForm() | raw }}
+    </div>
+</div>
+{% endblock %}
+{% block js %}
+<script>
+    $('#val_rete').change(function () {
+            var rate= parseInt($(this).val());
+            var face = parseInt($('#face').text());
+            var money = (face*rate/100).toFixed(2);
+        $('#val_pay_money').val(money);
+    })
+    $(function () {
+        paychange(1);
+    })
+    $('#pay_type').change(function () {
+        var id = $(this).val();
+        paychange(id);
+    })
+    function paychange(id) {
+        $('#buyback').find('tr').hide();
+        $('#pay_typetr').show();
+        $('#pay_money').show();
+        $('#rate').show();
+        $('#submit').show();
+        if (id == 1)   //支付宝
+        {
+            $('#pay_accounts').show();
+            $('#pay_accounts').find('td').eq(0).text('支付宝帐号');
+            $('#pay_name').show();
+            $('#pay_name').find('td').eq(0).text('用户名');
+            $('#pay_desc').show();
+
+        } else if (id == 2) { //微信
+            $('#pay_accounts').show();
+            $('#pay_accounts').find('td').eq(0).text('微信帐号');
+
+        } else {          //银行卡
+            $('#bank_name').show();
+            $('#pay_accounts').show();
+            $('#pay_name').show();
+            $('#pay_name').find('td').eq(0).text('姓名');
+        }
+    }
+
+    function save() {
+        $("#product-form").form('submit', {
+            success: function (data) {
+                console.log(data)
+                data = eval("(" + data + ")");
+                if (data.code == 1) {
+                    alert('保存成功');
+                    window.location.reload();
+                } else {
+                    $.messager.alert('保存失败', data.message, 'fail');
+                }
+            }
+        })
+    }
+</script>
+{% endblock %}

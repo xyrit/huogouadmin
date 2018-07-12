@@ -1,0 +1,62 @@
+{% extends '@app/views/base.html' %}
+
+{% block main %}
+
+<img height="{{ height }}" width="{{ width }}" id="cropTestImg" src="{{ url }}" name="{{ basename }}" share_topic_id="{{ share_topic_id }}"/>
+<div><a href="javascript:void(0)" class="easyui-linkbutton" onclick="verify('main')">设置主图</a></div>
+<div><a href="javascript:void(0)" class="easyui-linkbutton" onclick="verify('main')" id="cut_roll">截取滚动图</a>
+<a href="javascript:void(0)" class="easyui-linkbutton" onclick="verify('roll')">设置滚动图</a>
+    </div>
+<div>
+<a href="javascript:void(0)" class="easyui-linkbutton" onclick="verify('main')" id="cut_recommend">截取推荐图</a>
+<a href="javascript:void(0)" class="easyui-linkbutton" onclick="verify('recommend')">设置推荐图</a>
+</div>
+{% endblock %}
+
+{% block js %}
+<script src="{{ app.params.skinUrl }}/js/excanvas.js"></script>
+<script src="{{ app.params.skinUrl }}/js/crop_rotation.js"></script>
+<script>
+    var percent = 555/369;
+    $(function() {
+        var oImg = document.getElementById("cropTestImg");
+        fnImageCropRot(oImg, "{{ orgwidth }}", "{{ orgheight }}");
+        $('#cut_roll').click(function() {
+            percent = 230/146;
+        })
+
+        $('#cut_recommend').click(function() {
+            percent = 555/369;
+        })
+    });
+
+    function verify(size) {
+        var x = $("#cropPosX").val(),
+                y = $("#cropPosY").val(),
+                w = $("#cropImageWidth").val(),
+                h = $("#cropImageHeight").val(),
+                angle = $("#zxxRotAngle").attr('angle');
+        if (angle === "") {
+            angle = 0;
+        }
+        //alert("角度：" + angle + "\n剪裁横坐标：" + x + "\n剪裁纵坐标：" + y + "\n剪裁宽度：" + w + "\n剪裁高度：" + h);
+        var params = {
+            share_topic_id: $('#cropTestImg').attr('share_topic_id'),
+            basename: $('#cropTestImg').attr('name'),
+            size: size,
+            angle: angle,
+            x: x,
+            y: y,
+            w: w,
+            h: h,
+        };
+        $.get("{{ url('share/set-picture') }}", params, function (data) {
+            alert('设置成功!');
+            parent.location.reload()
+            parent.$('#dlg-edit').window('close');
+            //window.parent.window.reloadgrid();
+
+        }, 'json');
+    };
+</script>
+{% endblock %}

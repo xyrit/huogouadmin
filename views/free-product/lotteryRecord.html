@@ -1,0 +1,64 @@
+{% extends '@app/views/base.html' %}
+
+{% block main %}
+<style>
+    .datagrid-btable tr{height: 64px!important;}
+</style>
+
+<table id="listdata" class="easyui-datagrid" title="商品列表"
+       data-options="
+            toolbar:'#tb-user',
+            rownumbers:true,
+            singleSelect:true,
+            pagination:true,
+            method:'get',
+            url:'{{ url('free-product/lottery-record', {'id': get.id,'pnum':get.pnum}) }}',
+            rownumbers: false,
+            nowrap:false
+        ">
+    <thead>
+    <tr>
+        <!--<th data-options="field:'ck', checkbox: true">-->
+        <th data-options="field:'user', width:200, align:'center'">会员</th>
+        <th data-options="field:'buy_time', width:200, align:'center'" formatter="formatTime">参与时间</th>
+        <th data-options="field:'code', width:80, align:'center'">伙购码</th>
+    </tr>
+    </thead>
+</table>
+
+<div id="tb-user" style="height:auto">
+        <div><span><img width="60" src="{{productPic}}"></span><span>{{product.name}}</span></div>
+        <div>
+            选择期数
+            <select name="pnum" id="pnumSel">
+                {% for p in periods %}
+                <option value="{{p.period_number}}" {% if get.pnum==p.period_number %}selected{% endif %}>第{{p.period_number}}期</option>
+                {% endfor %}
+            </select>
+        </div>
+    <div>中奖者 {% if user is empty %}暂无{% else %}昵称: <span>{{user.nickname}}</span> 手机号: <span>{{user.phone}}</span> 邮箱: <span>{{user.email}}</span>用户ID: <span>{{user.id}}</span>{% endif %}</div>
+</div>
+
+
+{% endblock %}
+
+{% block js %}
+<script>
+    function reloadgrid(){
+
+    }
+
+
+    function sort(type, order) {
+
+    }
+
+    $(function() {
+        $('#pnumSel').on('change',function() {
+            var pnum = $(this).val();
+            location.href = "{{ url('/free-product/lottery-record') }}?id={{get.id}}&pnum="+pnum;
+        });
+    });
+</script>
+{% endblock %}
+

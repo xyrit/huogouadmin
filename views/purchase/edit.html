@@ -1,0 +1,139 @@
+{% extends '@app/views/base.html' %}
+
+{% block main %}
+<div style="padding:10px 60px 20px 60px">
+    {{ html.beginForm('', 'post', {'id':'purchase_form'}) | raw }}
+    <table cellpadding="5" id="list">
+        <tr><td>采购清单<br /></td></tr>
+        {% for item in orderItem %}
+        <tr>
+            <td colspan="2">{{ item.product_name }}</td>
+        </tr>
+        <tr>
+            <td>供应商</td>
+            <td>{{ item.supplier_name }}</td>
+        </tr>
+        <tr>
+            <td>采购价</td>
+            <td>{{ item.supplier_price }}</td>
+        </tr>
+        <tr>
+            <td>数量</td>
+            <td><input class="easyui-textbox textbox-f" type="text" data-options="required:true" value="{{ item.product_num }}" name="Purchase[{{ item.supplier_id }}][{{ item.product_id }}][num]"></td>
+        </tr>
+        <tr>
+            <td>是否优惠</td>
+            <td>
+                <input name="Purchase[{{ item.supplier_id }}][{{ item.product_id }}][privilege]" type="radio" class="easyui-validatebox validatebox-text" {% if item.privilege == 0 %}checked{% endif %} value="0">无优惠
+                <input name="Purchase[{{ item.supplier_id }}][{{ item.product_id }}][privilege]" type="radio" class="easyui-validatebox validatebox-text" {% if item.privilege > 0 %}checked{% endif %} value="1">有优惠
+                <i style="font-style: normal; {% if item.privilege == 0 %}display: none{% endif %}">
+                    <input class="easyui-textbox textbox-f" type="text" value="{{ item.privilege }}" style="width: 100px" name="Purchase[{{ item.supplier_id }}][{{ item.product_id }}][privilege_price]">
+                </i>
+            </td>
+        </tr>
+        <tr>
+            <td>合计</td>
+            <td>{{ item.total }}</td>
+        </tr>
+        <tr>
+            <td colspan="2"><hr></td>
+        </tr>
+        {% endfor %}
+    </table>
+    {{ html.endForm() | raw }}
+    <a class="easyui-linkbutton" data-options="iconCls:'icon-add'" onclick="addProduct()" style="margin-bottom: 20px;">添加商品</a><br />
+    <a href="javascript:void(0)" class="easyui-linkbutton" onclick="submitForm()" style="width: 80px;">确定</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" onclick="clearForm()" style="width: 80px;">取消</a>
+</div>
+
+<div id="dlg-show-product" class="easyui-window" title="商品列表" style="width:700px;height:100px;padding:10px;overflow:hidden;" data-options="
+            iconCls:'icon-save',
+            closed:true,
+            modal:true,
+            onResize:function(){
+                $(this).window('hcenter');
+            }">
+    <span>供应商列表<select class="easyui-combobox" id="supplier" editable="true" style="width:100px;"></select></span>
+    <i class="product" style="font-style: normal;">
+        <span>商品列表<select class="easyui-combobox" id="product" editable="true" style="width:400px;"></select></span>
+    </i>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+    $(function() {
+        $('input[type=radio]').on('click', function() {
+            if ($(this).val() == 1) {
+                $(this).siblings('i').show();
+            } else {
+                $(this).siblings('i').hide();
+                $(this).siblings('i').find('input[type=text]').textbox('setValue', 0);
+            }
+        })
+    });
+
+    function submitForm() {
+        $('#purchase_form').form({
+            url: "{{ url('purchase/edit', {'id': model.id}) }}",
+            onSubmit:function() {
+                return $(this).form('enableValidation').form('validate');
+            },
+            success: function (data) {
+                var data = eval('('+data+')');
+                if (data.error == 0) {
+                    $.messager.alert('成功', data.message);
+                    parent.location.reload();
+                } else {
+                    $.messager.alert('失败', data.message, 'error');
+                }
+            }
+        });
+        $('#purchase_form').submit();
+    }
+
+    function addProduct() {
+        $('.product').hide();
+        $('#supplier').combobox({
+            url:"{{ url('supplier/list') }}",
+            method:'get',
+            valueField: 'id',
+            textField: 'name',
+            onSelect: function(supplier) {
+                $('#product').combobox({
+                    url:"{{ url('supplier/product-list') }}" + '?id=' + supplier.id,
+                    method:'get',
+                    valueField: 'id',
+                    textField: 'name',
+                    onSelect: function(product) {
+                        if ($('input[name="Purchase['+supplier.id+']['+product.id+'][num]"]').length > 0) {
+                            $.messager.alert('失败', '商品已添加', 'error');
+                            return false;
+                        }
+                        $.post("{{ url('supplier/product-price') }}", {supplier_id: supplier.id, product_id: product.id}, function(data) {
+                            $('#dlg-show-product').window('close');
+                            strHtml = '<tr><td colspan="2">'+product.name+'</td></tr>';
+                            strHtml += '<tr><td>供应商</td><td>'+supplier.name+'</td></tr>';
+                            strHtml += '<tr><td>采购价</td><td>'+data.price+'</td></tr>';
+                            strHtml += '<tr><td>数量</td><td><input class="easyui-textbox" type="text" name="Purchase['+supplier.id+']['+product.id+'][num]" data-options="required:true" value="1" /></td></tr>';
+                            strHtml += '<tr><td>是否优惠</td><td><input name="Purchase['+supplier.id+']['+product.id+'][privilege]" type="radio" class="easyui-validatebox" checked value="0">无优惠<input name="Purchase['+supplier.id+']['+product.id+'][privilege]" type="radio" class="easyui-validatebox" value="1">有优惠<i style="font-style: normal; display: none"><input class="easyui-textbox" type="text" name="Purchase['+supplier.id+']['+product.id+'][privilege_price]" value="0" style="width: 100px;" /></i></td></tr>';
+                            strHtml += '<tr><td>合计</td><td>'+data.price+'</td></tr><tr><td colspan="2"><hr /></td></tr>';
+                            $.parser.parse($(strHtml).appendTo('#list'));
+                            $('input[type=radio]').on('click', function() {
+                                if ($(this).val() == 1) {
+                                    $(this).siblings('i').show();
+                                } else {
+                                    $(this).siblings('i').hide();
+                                    $(this).siblings('i').find('input[type=text]').textbox('setValue', 0);
+                                }
+                            })
+                        });
+                    }
+                });
+                $('.product').show();
+            }
+        });
+        $('#dlg-show-product').window('open');
+    }
+</script>
+{% endblock %}

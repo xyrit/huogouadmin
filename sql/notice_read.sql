@@ -1,0 +1,13 @@
+CREATE TABLE `notice_read` (
+	`id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'ID',
+	`user_id` INT(10) UNSIGNED NOT NULL COMMENT '用户ID',
+	`type` TINYINT(1) NOT NULL COMMENT '公告类型',
+	`notice_id` INT(10) NOT NULL COMMENT '公告id',
+	`view` TINYINT(1) NOT NULL DEFAULT '1' COMMENT '0未查看，1已查看',
+	`open` TINYINT(1) NOT NULL DEFAULT '1' COMMENT '1开启，0关闭',
+	`created_time` INT(10) UNSIGNED NOT NULL COMMENT '阅读时间',
+	PRIMARY KEY (`id`)
+)
+COMMENT='用户已读公告'
+COLLATE='utf8_general_ci'
+ENGINE=InnoDB;

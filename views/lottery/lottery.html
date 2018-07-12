@@ -1,0 +1,25 @@
+{% extends '@app/views/base.html' %}
+
+{% block main %}
+<table id="listdata"  class="easyui-datagrid" title="抽奖列表" data-options="toolbar:'#tb-user',singleSelect:true,pagination:true,method:'get',url:'{{ url('lottery/lottery')}}?id={{ id }}',pageSize:10">
+    <thead>
+    <tr>
+        <th data-options="field:'id', width:50, align:'center'">序号</th>
+        <th data-options="field:'username', width:200, align:'center'">用户名</th>
+        <th data-options="field:'name', width:300, align:'center'">奖品名称</th>
+        <th data-options="field:'content', width:200, align:'center'">奖品内容</th>
+        <th data-options="field:'time', width:200, align:'center'" formatter="formatTime">参与时间</th>
+    </tr>
+    </thead>
+</table>
+{% endblock %}
+
+{% block js %}
+<script>
+    function formatUsername(val, row)
+    {
+        return val.phone + '<br />' + val.email;
+    }
+
+</script>
+{% endblock %}

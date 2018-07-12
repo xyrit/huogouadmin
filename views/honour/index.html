@@ -1,0 +1,146 @@
+{% extends '@app/views/base.html' %}
+
+{% block main %}
+<style>
+    .datagrid-btable tr{height: 200px!important;}
+</style>
+<table id="listdata"  class="easyui-datagrid" title="活动列表" data-options="toolbar:'#tb-user',singleSelect:true,pagination:true,method:'get',url:'{{ url('honour/index') }}'">
+    <thead>
+    <tr style="height:200px;">
+        <th data-options="field:'id', width:150, align:'center'">序号</th>
+        <th data-options="field:'from', width:150, align:'center'" formatter="formatFrom">来源</th>
+        <th data-options="field:'title', width:180, align:'center'">标题</th>
+        <th data-options="field:'icon',width:300, align:'center'" formatter="formatPicture">图片</th>
+        <th data-options="field:'desc', width:500, align:'center'">说明</th>
+    </tr>
+    </thead>
+</table>
+
+<div id="tb-user" style="height:auto">
+    <div>
+        {% if(add == 1) %}
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true" onclick="add()">新增</a>
+        {% endif %}
+        {% if(edit == 1) %}
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-edit',plain:true" onclick="edit()">修改</a>
+        {% endif %}
+        {% if(del == 1) %}
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-cancel',plain:true" onclick="del()">删除</a>
+        {% endif %}
+    </div>
+</div>
+
+<div id="dlg-add" title="新增" class="easyui-dialog" style="width:350px;height:auto;padding:10px 20px;" modal="true" closed="true" buttons="#dlg-buttons-add">
+    {{ html.beginForm('', 'post', {'class':'am-form am-form-horizontal', 'id':'addForm','enctype':"multipart/form-data"}) | raw }}
+    <table cellpadding="5">
+        <tr>
+            <td>站点</td>
+            <td>
+                <select name="HonourDesc[from]">
+                    <option value="1" >伙购网</option>
+                    <option value="2" >滴滴夺宝</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>添加标题</td>
+            <td><input class="easyui-textbox" name="HonourDesc[title]" data-options="required:true"></td>
+        </tr>
+        <tr>
+            <td>添加图片</td>
+            <td>
+                <input class="easyui-filebox" name="picture" data-options="prompt:'上传图片'" style="width:100%" data-options="required:true">
+            </td>
+        </tr>
+        <tr>
+            <td>描述</td>
+            <td>
+                <textarea name="HonourDesc[desc]" rows="8" cols="25"></textarea>
+            </td>
+        </tr>
+    </table>
+    {{ html.endForm() | raw }}
+</div>
+
+<div id="dlg-buttons-add" style="text-align:center;padding:5px">
+    <a class="easyui-linkbutton" iconCls="icon-ok" onclick="save()">确定</a>
+    <a class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg-add').dialog('close')">取消</a>
+</div>
+
+<div id="dlg-edit" class="easyui-window" title="修改banner" style="width:480px;height:450px;padding:10px;overflow:hidden;" data-options="width:440,iconCls:'icon-save',closed:true,modal:true,onResize:function(){ $(this).window('hcenter');}">
+    <iframe width="100%" height="100%" frameborder="0" id="edit_iframe">
+    </iframe>
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+    function add(){
+        $('#dlg-add').dialog('open');
+    }
+
+    function formatPicture(val, row) {
+        return '<img src="'+val+'">';
+    }
+    function formatFrom(val, row) {
+        if (val==1) {
+            return '伙购网';
+        } else if (val==2) {
+            return '滴滴夺宝';
+        }
+    }
+
+    function edit(){
+        var selRow = $('#listdata').datagrid('getSelected');
+        if (!selRow) {
+            $.messager.alert('错误','请选择一个');
+            return false;
+        }
+        $('#edit_iframe').prop('src', "{{ url('honour/edit') }}" + '?id=' + selRow.id);
+        $('#dlg-edit').window('open');
+    }
+
+    function del(){
+        var selRow = $('#listdata').datagrid('getSelected');
+        if (!selRow) {
+            $.messager.alert('错误','请选择一个');
+            return false;
+        }
+        $.messager.confirm('Confirm', '确认删除吗?', function(r) {
+            $.get("{{ url('honour/del') }}", {'id':selRow.id}, function(data) {
+                if (data.error) {
+                    $.messager.alert('错误', data.message, 'error');
+                } else {
+                    $.messager.alert('成功', data.message);
+                    setTimeout(function(){location.reload();}, 2000);
+                }
+            }, 'json');
+        });
+    }
+
+    function save(){
+        $('#addForm').form({
+            url: '{{ url("honour/add") }}',
+            onSubmit: function(param){
+                var isValid = $(this).form('validate');
+                if (!isValid){
+                    $.messager.progress('close');	// 如果表单是无效的则隐藏进度条
+                }
+                return isValid;	// 返回false终止表单提交
+            },
+            success: function (data) {
+                data = eval('(' + data + ')');
+                if (data.error == 0) {
+                    $.messager.alert('成功', data.message);
+                    setTimeout(function(){location.reload();}, 2000);
+                } else {
+                    $.messager.alert('失败', data.message);
+                    return false;
+                }
+            }
+        });
+        $('#addForm').submit();
+    }
+</script>
+{% endblock %}
+

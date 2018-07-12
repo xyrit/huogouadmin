@@ -1,0 +1,44 @@
+{% extends '@app/views/base.html' %}
+
+{% block main %}
+
+<div class="easyui-tabs" style="width:500px;height:auto" id="login">
+    <div title="伙购">
+        <form method="post" action="{{ url('app/h5pay') }}" name="huogouForm">
+            <table cellpadding="5">
+                <tr>
+                    <input type="hidden" name="from" value="1" id="huogouFrom">
+                    <td>伙购网</td>
+                    <td>启用版本号:</td>
+                    <td><input type="text" name="content[version]" value="{{ huogou.content.version}}"></td>
+                    <td>是否启用:</td>
+                    <td><input type="checkbox" name="status" value="1" {% if(huogou.status == 1) %}checked{% endif %}></td>
+                </tr>
+                <tr>
+                    <td><input type="submit" value="提交"></td>
+                    <td></td>
+                </tr>
+            </table>
+        </form>
+    </div>
+
+    <div title="滴滴">
+        <form method="post" action="{{ url('app/h5pay') }}?from=2" name="diForm">
+            <table cellpadding="5">
+                <tr>
+                    <input type="hidden" name="from" value="2" id="didiFrom">
+                    <td>滴滴夺宝</td>
+                    <td>启用版本号:</td>
+                    <td><input type="text" name="content[version]" value="{{ didi.content.version}}"></td>
+                    <td>是否启用:</td>
+                    <td><input type="checkbox" name="status" value="1" {% if(didi.status == 1) %}checked{% endif %}></td>
+                </tr>
+                <tr>
+                    <td><input type="submit" value="提交" ></td>
+                    <td></td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+{% endblock %}

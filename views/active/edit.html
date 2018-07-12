@@ -1,0 +1,99 @@
+{% extends '@app/views/base.html' %}
+
+{% block main %}
+<div class="easyui-panel">
+    {{ html.beginForm('', 'post', {'class':'am-form am-form-horizontal', 'id':'submitForm','enctype':"multipart/form-data"}) | raw }}
+    <table cellpadding="5">
+        <tr>
+            <td>站点</td>
+            <td>
+                <select id="active-from" name="Active[from]">
+                    <option value="1" {% if model.from=="1" %}selected{% endif %}>伙购网</option>
+                    <option value="2" {% if model.from=="2" %}selected{% endif %}>滴滴夺宝</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>最低版本</td>
+            <td><input class="easyui-textbox" name="Active[min_ver]" data-options="required:true"
+                       value="{{ model.min_ver }}"><span style="color: red">(例:2.0.0,默认不填)</span>
+            </td>
+        </tr>
+        <tr>
+            <td>添加标题</td>
+            <td><input class="easyui-textbox" name="Active[title]" data-options="required:true" value="{{ model.title }}"></td>
+        </tr>
+        <tr>
+            <td>添加小标题</td>
+            <td><input class="easyui-textbox" type="text" name="Active[sub_title]" data-options="required:true" value="{{ model.sub_title }}"></td>
+        </tr>
+        <tr>
+            <td>状态</td>
+            <td>
+                <select class="easyui-combobox" name="Active[status]" data-options="panelHeight:'auto',value:'{{ model.status }}'">
+                    <option value="1">启用</option>
+                    <option value="0">禁用</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>类型</td>
+            <td><input type="radio" name="Active[type]" value="1" {% if(model.type == 1) %}checked{% endif %}>H5 <input type="radio" name="Active[type]" value="2" {% if(model.type == 2) %}checked{% endif %}>原生</td>
+        </tr>
+        <tr>
+            <td>添加标签</td>
+            <td><input type="radio" name="Active[flag]" value="0" {% if(model.flag == 0) %}checked{% endif %}>不选<input type="radio" name="Active[flag]" value="1" {% if(model.flag == 1) %}checked{% endif %}>new <input type="radio" name="Active[flag]" value="2" {% if(model.flag == 2) %}checked{% endif %}>hot <input type="radio" name="Active[flag]" value="3" {% if(model.flag == 3) %}checked{% endif %}>全选</td>
+        </tr>
+        <tr>
+            <td>添加图片</td>
+            <td>
+                <img src="{{ model.icon }}"><input class="easyui-filebox" name="picture" data-options="prompt:'上传图片'" style="width:100%" data-options="required:true">
+            </td>
+        </tr>
+        <tr>
+            <td>关联url</td>
+            <td><input class="easyui-textbox" type="text" name="Active[url]" data-options="required:true,validType:'url'" value="{{ model.url }}"></td>
+        </tr>
+        <tr>
+            <td>排序</td>
+            <td><input class="easyui-textbox" name="Active[list_order]" value="{{ model.list_order }}"></td>
+        </tr>
+        <tr>
+            <td>描述</td>
+            <td>
+                <textarea name="Active[desc]" rows="8" cols="25">{{ model.desc }}</textarea>
+            </td>
+        </tr>
+    </table>
+    {{ html.endForm() | raw }}
+</div>
+
+<div id="dlg-buttons-add" style="text-align:center;padding:5px">
+    <a class="easyui-linkbutton" iconCls="icon-ok" onclick="submitForm()">确定</a>
+    <a class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:parent.location.reload();">取消</a>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+    function submitForm(){
+        $('#submitForm').form({
+            url: '/active/edit?id='+ "{{ model.id }}",
+            success: function (data) {
+                data = eval('(' + data + ')');
+                if (data.error == 0) {
+                    $.messager.alert('成功', data.message);
+                    setTimeout(function(){parent.location.reload();}, 2000);
+                } else {
+                    $.messager.alert('失败', data.message);
+                    return false;
+                }
+            }
+        });
+        $('#submitForm').submit();
+    }
+    function clearForm(){
+        $('#submitForm').form('clear');
+    }
+</script>
+{% endblock %}

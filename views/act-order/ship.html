@@ -1,0 +1,68 @@
+<link rel="stylesheet" type="text/css" href="{{ app.params.skinUrl }}/js/jquery-easyui-1.4.4/themes/default/easyui.css">
+<link rel="stylesheet" type="text/css" href="{{ app.params.skinUrl }}/js/jquery-easyui-1.4.4/themes/icon.css">
+
+<script src="{{ app.params.skinUrl }}/js/jquery-easyui-1.4.4/jquery.min.js" type="text/javascript"></script>
+<script src="{{ app.params.skinUrl }}/js/jquery-easyui-1.4.4/jquery.easyui.min.js" type="text/javascript"></script>
+<script src="{{ app.params.skinUrl }}/js/jquery-easyui-1.4.4/locale/easyui-lang-zh_CN.js" type="text/javascript"></script>
+
+<div title="Basic Window"  style="padding:5px;height:auto;width:100%" class="box">
+    {% if(model.status == 3) %}
+    {{ html.beginForm('', 'post', {'class':'am-form am-form-horizontal', 'id':'send-form'}) | raw }}
+    <table cellpadding="10">
+        <tr>
+            <td>快递公司</td>
+            <td>
+                <select name="company" data-options="required:true" class="easyui-combobox">
+                    {% for key,item in express %}
+                    <option name="{{ key }}">{{ key }}</option>
+                    {% endfor %}
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>快递订单号</td>
+            <td><input class="easyui-textbox" type="text" name="orderNo" data-options="required:true"></td>
+        </tr>
+        <tr>
+            <td>快递费用</td>
+            <td><input class="easyui-textbox" type="text" name="cost"></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>
+                <input type="submit" class="easyui-linkbutton">
+            </td>
+        </tr>
+    </table>
+    {{ html.endForm() | raw }}
+    {% endif %}
+</div>
+
+<script>
+    $(function(){
+        var form = 'send-form';
+        id = "{{ model.id }}";
+
+        var url = '/act-order/ship?id='+id;
+
+        $('#' + form).form({
+            url: url,
+            onSubmit:function(){
+                return $(this).form('enableValidation').form('validate');
+            },
+            success: function (data) {
+                var data = eval('('+data+')');
+                if (data.error == 0) {
+                    $.messager.alert('成功', data.message);
+                    setTimeout(function(){
+                        parent.closeWindow('send');
+                        parent.parent.reloadgrid();
+                    }, 1000);
+                } else {
+                    $.messager.alert('失败', data.message, 'error');
+                }
+            }
+        });
+        $('#' + form).submit();
+    })
+</script>

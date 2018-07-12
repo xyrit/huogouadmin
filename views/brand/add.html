@@ -1,0 +1,62 @@
+{% extends '@app/views/base.html' %}
+
+{% block main %}
+<div style="margin:20px 0;"></div>
+<div class="easyui-panel" title="新增品牌" style="width:400px">
+    <div style="padding:10px 60px 20px 60px">
+        {{ html.beginForm('/brand/add', 'post', {'class':'am-form am-form-horizontal', 'id':'submitForm'}) | raw }}
+        <table cellpadding="5">
+            <tr>
+                <td>品牌名称</td>
+                <td><input class="easyui-textbox" type="text" name="Brand[name]" data-options="required:true"></td>
+            </tr>
+            <tr>
+                <td>品牌别名</td>
+                <td><input class="easyui-textbox" type="text" name="Brand[alias]" data-options="required:true"></td>
+            </tr>
+            <tr>
+                <td>品牌网址</td>
+                <td><input class="easyui-textbox" type="text" name="Brand[url]" data-options="required:true"></td>
+            </tr>
+            <tr>
+                <td>品牌介绍</td>
+                <td><input class="easyui-textbox" type="text" name="Brand[intro]" data-options="required:true"></td>
+            </tr>
+        </table>
+        {{ html.endForm() | raw }}
+        <div style="text-align:center;padding:5px">
+            <a href="javascript:void(0)" class="easyui-linkbutton" onclick="submitForm()">确定</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" onclick="clearForm()">取消</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+    function onLoadSuccess() {
+        $('#parent_id').combobox('select',"{{ formModel.parent_id }}");
+    }
+
+    function submitForm(){
+        $('#submitForm').form({
+            success: function (data) {
+                data = eval('(' + data + ')');
+                if (data.error == 0) {
+                    $.messager.alert('成功', data.message);
+                    window.location.href = '/brand';
+                } else {
+                    $.each(data.message, function(i, v) {
+                        $.messager.alert('失败', v, 'error');
+                        return false;
+                    })
+                }
+            }
+        });
+        $('#submitForm').submit();
+    }
+    function clearForm(){
+        $('#submitForm').form('clear');
+    }
+</script>
+{% endblock %}

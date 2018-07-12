@@ -1,0 +1,328 @@
+{% extends '@app/views/base.html' %}
+
+{% block main %}
+<h3>日常签到</h3>
+<hr />
+{{ html.beginForm('', 'post', {'id':'sign_form'}) | raw }}
+<span>连续签到
+    <select class="easyui-combobox" data-options="panelHeight:'auto'" id="days">
+        {% for i in 7..31 %}
+        <option value="{{ i }}">{{ i }}</option>
+        {% endfor %}
+    </select>天
+</span><br>
+<table cellpadding="5" id="signList">
+    {% for item in sign %}
+    <tr>
+        <td><b>第{{ item.days }}天</b></td>
+        <td>送
+            <select class="easyui-combobox" data-options="panelHeight:'auto', onChange: onChange" name="UserTask[{{ item.days }}][type]" day="{{ item.days }}">
+                <option value="1" {% if item.type == 1 %}selected{% endif %} >福分</option>
+                <option value="2" {% if item.type == 2 %}selected{% endif %} >伙购币</option>
+                <option value="3" {% if item.type == 3 %}selected{% endif %} >红包</option>
+            </select>
+    <span>
+        {% if item.type == 1 %}
+        <input class="easyui-textbox" type="text" name="UserTask[{{ item.days }}][num]" value="{{ item.num }}" style="width: 50px;" data-options="required:true">分
+        {% elseif item.type == 2 %}
+        <input class="easyui-textbox" type="text" name="UserTask[{{ item.days }}][num]" value="{{ item.num }}" style="width: 50px;" data-options="required:true">个
+        {% elseif item.type == 3 %}
+        <label id="numName{{ item.days }}">{{ item.packetName }}</label>
+        <input type="hidden" name="UserTask[{{ item.days }}][num]" value="{{ item.num }}" id="num{{ item.days }}" data-options="required:true">
+        <a href="javascript:void(0);" onclick="addPacket('{{ item.days }}');" class="easyui-linkbutton">选择红包</a>
+        {% endif %}
+    </span>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+<span>签到规则说明:</span><br /><br />
+<input class="easyui-textbox" data-options="multiline:true" style="width:400px;height:200px" name="content" value="{{ content }}">
+
+<h3>新手任务</h3>
+<hr />
+<table cellpadding="5">
+    {% for item in task %}
+    {% if item.type == 1 %}
+    <tr>
+        <td><b>{{ item.name }}</b></td>
+        <td>送
+            <select class="easyui-combobox" data-options="panelHeight:'auto', onChange: onChangeTask" name="Task[{{ item.id }}][award_type]" taskId="{{ item.id }}">
+                <option value="1" {% if item.award_type == 1 %}selected{% endif %} >福分</option>
+                <option value="2" {% if item.award_type == 2 %}selected{% endif %} >伙购币</option>
+                <option value="3" {% if item.award_type == 3 %}selected{% endif %} >红包</option>
+            </select>
+            <span>
+                {% if item.award_type == 1 %}
+                <input class="easyui-textbox" type="text" name="Task[{{ item.id }}][award_num]" value="{{ item.award_num }}" style="width: 50px;" data-options="required:true">分
+                {% elseif item.award_type == 2 %}
+                <input class="easyui-textbox" type="text" name="Task[{{ item.id }}][award_num]" value="{{ item.award_num }}" style="width: 50px;" data-options="required:true">个
+                {% elseif item.award_type == 3 %}
+                <label id="numNameTask{{ item.id }}">{{ item.packetName }}</label>
+                <input type="hidden" name="Task[{{ item.id }}][award_num]" value="{{ item.award_num }}" id="numTask{{ item.id }}" data-options="required:true">
+                <a href="javascript:void(0);" onclick="addPacket('Task{{ item.id }}');" class="easyui-linkbutton">选择红包</a>
+                {% endif %}
+            </span>
+        </td>
+    </tr>
+    {% endif %}
+    {% endfor %}
+</table>
+<span>新手任务说明:</span><br /><br />
+<input class="easyui-textbox" data-options="multiline:true" style="width:400px;height:200px" name="new_task" value="{{ new_task }}">
+
+<h3>日常任务</h3>
+<hr />
+<table cellpadding="5">
+    {% for item in task %}
+    {% if item.type == 2 %}
+    <tr>
+        <td><b>{{ item.name }}</b></td>
+        <td>送
+            <select class="easyui-combobox" data-options="panelHeight:'auto', onChange: onChangeTask" name="Task[{{ item.id }}][award_type]" taskId="{{ item.id }}">
+                <option value="1" {% if item.award_type == 1 %}selected{% endif %} >福分</option>
+                <option value="2" {% if item.award_type == 2 %}selected{% endif %} >伙购币</option>
+                <option value="3" {% if item.award_type == 3 %}selected{% endif %} >红包</option>
+            </select>
+            <span>
+                {% if item.award_type == 1 %}
+                <input class="easyui-textbox" type="text" name="Task[{{ item.id }}][award_num]" value="{{ item.award_num }}" style="width: 50px;" data-options="required:true">分
+                {% elseif item.award_type == 2 %}
+                <input class="easyui-textbox" type="text" name="Task[{{ item.id }}][award_num]" value="{{ item.award_num }}" style="width: 50px;" data-options="required:true">个
+                {% elseif item.award_type == 3 %}
+                <label id="numNameTask{{ item.id }}">{{ item.packetName }}</label>
+                <input type="hidden" name="Task[{{ item.id }}][award_num]" value="{{ item.award_num }}" id="numTask{{ item.id }}" data-options="required:true">
+                <a href="javascript:void(0);" onclick="addPacket('Task{{ item.id }}');" class="easyui-linkbutton">选择红包</a>
+                {% endif %}
+            </span>
+        </td>
+    </tr>
+    {% endif %}
+    {% endfor %}
+</table>
+<span>日常任务说明:</span><br /><br />
+<input class="easyui-textbox" data-options="multiline:true" style="width:400px;height:200px" name="daily_task" value="{{ daily_task }}">
+
+<h3>成长任务</h3>
+<hr />
+<h3>称号</h3>
+<table cellpadding="5">
+    {% for item in task %}
+    {% if item.type == 3 and item.level == 1 %}
+    <tr>
+        <td>
+            <b>{{ item.name }}</b>
+            <input class="easyui-textbox" type="text" name="Task[{{ item.id }}][num]" value="{{ item.num }}" style="width: 50px;" data-options="required:true">次
+        </td>
+        <td>送
+            <select class="easyui-combobox" data-options="panelHeight:'auto', onChange: onChangeTask" name="Task[{{ item.id }}][award_type]" taskId="{{ item.id }}">
+                <option value="1" {% if item.award_type == 1 %}selected{% endif %} >福分</option>
+                <option value="2" {% if item.award_type == 2 %}selected{% endif %} >伙购币</option>
+                <option value="3" {% if item.award_type == 3 %}selected{% endif %} >红包</option>
+            </select>
+            <span>
+                {% if item.award_type == 1 %}
+                <input class="easyui-textbox" type="text" name="Task[{{ item.id }}][award_num]" value="{{ item.award_num }}" style="width: 50px;" data-options="required:true">分
+                {% elseif item.award_type == 2 %}
+                <input class="easyui-textbox" type="text" name="Task[{{ item.id }}][award_num]" value="{{ item.award_num }}" style="width: 50px;" data-options="required:true">个
+                {% elseif item.award_type == 3 %}
+                <label id="numNameTask{{ item.id }}">{{ item.packetName }}</label>
+                <input type="hidden" name="Task[{{ item.id }}][award_num]" value="{{ item.award_num }}" id="numTask{{ item.id }}" data-options="required:true">
+                <a href="javascript:void(0);" onclick="addPacket('Task{{ item.id }}');" class="easyui-linkbutton">选择红包</a>
+                {% endif %}
+            </span>
+        </td>
+    </tr>
+    {% endif %}
+    {% endfor %}
+</table>
+<h3>充值</h3>
+<table cellpadding="5">
+    {% for item in task %}
+    {% if item.type == 3 and item.level == 2 %}
+    <tr>
+        <td>
+            <b>{{ item.name }}</b>
+            <input class="easyui-textbox" type="text" name="Task[{{ item.id }}][num]" value="{{ item.num }}" style="width: 50px;" data-options="required:true">元
+        </td>
+        <td>送
+            <select class="easyui-combobox" data-options="panelHeight:'auto', onChange: onChangeTask" name="Task[{{ item.id }}][award_type]" taskId="{{ item.id }}">
+                <option value="1" {% if item.award_type == 1 %}selected{% endif %} >福分</option>
+                <option value="2" {% if item.award_type == 2 %}selected{% endif %} >伙购币</option>
+                <option value="3" {% if item.award_type == 3 %}selected{% endif %} >红包</option>
+            </select>
+            <span>
+                {% if item.award_type == 1 %}
+                <input class="easyui-textbox" type="text" name="Task[{{ item.id }}][award_num]" value="{{ item.award_num }}" style="width: 50px;" data-options="required:true">分
+                {% elseif item.award_type == 2 %}
+                <input class="easyui-textbox" type="text" name="Task[{{ item.id }}][award_num]" value="{{ item.award_num }}" style="width: 50px;" data-options="required:true">个
+                {% elseif item.award_type == 3 %}
+                <label id="numNameTask{{ item.id }}">{{ item.packetName }}</label>
+                <input type="hidden" name="Task[{{ item.id }}][award_num]" value="{{ item.award_num }}" id="numTask{{ item.id }}" data-options="required:true">
+                <a href="javascript:void(0);" onclick="addPacket('Task{{ item.id }}');" class="easyui-linkbutton">选择红包</a>
+                {% endif %}
+            </span>
+        </td>
+    </tr>
+    {% endif %}
+    {% endfor %}
+</table>
+<h3>等级</h3>
+<table cellpadding="5">
+    {% for item in task %}
+    {% if item.type == 3 and item.level == 3 %}
+    <tr>
+        <td><b>{{ item.name }}</b></td>
+        <td>送
+            <select class="easyui-combobox" data-options="panelHeight:'auto', onChange: onChangeTask" name="Task[{{ item.id }}][award_type]" taskId="{{ item.id }}">
+                <option value="1" {% if item.award_type == 1 %}selected{% endif %} >福分</option>
+                <option value="2" {% if item.award_type == 2 %}selected{% endif %} >伙购币</option>
+                <option value="3" {% if item.award_type == 3 %}selected{% endif %} >红包</option>
+            </select>
+            <span>
+                {% if item.award_type == 1 %}
+                <input class="easyui-textbox" type="text" name="Task[{{ item.id }}][award_num]" value="{{ item.award_num }}" style="width: 50px;" data-options="required:true">分
+                {% elseif item.award_type == 2 %}
+                <input class="easyui-textbox" type="text" name="Task[{{ item.id }}][award_num]" value="{{ item.award_num }}" style="width: 50px;" data-options="required:true">个
+                {% elseif item.award_type == 3 %}
+                <label id="numNameTask{{ item.id }}">{{ item.packetName }}</label>
+                <input type="hidden" name="Task[{{ item.id }}][award_num]" value="{{ item.award_num }}" id="numTask{{ item.id }}" data-options="required:true">
+                <a href="javascript:void(0);" onclick="addPacket('Task{{ item.id }}');" class="easyui-linkbutton">选择红包</a>
+                {% endif %}
+            </span>
+        </td>
+    </tr>
+    {% endif %}
+    {% endfor %}
+</table>
+<span>成长任务说明:</span><br /><br />
+<input class="easyui-textbox" data-options="multiline:true" style="width:400px;height:200px" name="grow_task" value="{{ grow_task }}">
+
+{{ html.endForm() | raw }}
+<div style="width: 200px;">
+<a href="javascript:void(0)" class="easyui-linkbutton" onclick="submitForm()" style="width: 80px;">确定</a>
+<a href="javascript:void(0)" class="easyui-linkbutton" onclick="clearForm()" style="width: 80px;">取消</a>
+</div>
+
+<div id="dlg-add-packet" title="红包列表" class="easyui-dialog" style="width:600px;height:auto;padding:10px 20px" modal="true" closed="true" buttons="#dlg-buttons-send">
+    <span>红包列表<select class="easyui-combobox" id="packet" editable="true" style="width:100px;"></select></span><br />
+    <span id="content"></span>
+</div>
+
+<div id="dlg-buttons-send" style="text-align:center;padding:5px">
+    <a class="easyui-linkbutton" iconCls="icon-ok" onclick="submitAddPacket()">确定</a>
+    <a class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg-add-packet').dialog('close')">取消</a>
+</div>
+
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+    var day = 0;
+    $('#days').combobox({
+        onChange: function(newValue, oldValue) {
+            newValue = parseInt(newValue);
+            oldValue = parseInt(oldValue);
+            if (newValue > oldValue) {
+                for (var i = oldValue + 1; i <= newValue; i++) {
+                    var strHtml = '<tr><td><b>第' + i + '天</b></td><td>送 ';
+                    strHtml += '<select class="easyui-combobox" data-options="panelHeight:\'auto\', onChange: onChange" name="UserTask[' + i + '][type]" day="' + i + '">';
+                    strHtml += '<option value="1" selected>福分</option>';
+                    strHtml += '<option value="2">伙购币</option>';
+                    strHtml += '<option value="3">红包</option></select> ';
+                    strHtml += '<span><input class="easyui-textbox" type="text" name="UserTask[' + i + '][num]" style="width: 50px;">分</span>';
+                    strHtml += '</td></tr>';
+                    $.parser.parse($(strHtml).appendTo('#signList'));
+                }
+            } else {
+                for (var i = oldValue - 1; i >= newValue; i--) {
+                    $.parser.parse($('#signList tr:last').remove());
+                }
+            }
+        }
+    });
+
+    function onChange(newValue, oldValue) {
+        var selectedDay = $(this).attr('day');
+        if (newValue == 1) {
+            var tr = '<input class="easyui-textbox" type="text" name="UserTask[' + selectedDay + '][num]" style="width: 50px;" data-options="required:true">分';
+            $.parser.parse($(this).siblings('span').eq(1).html(tr));
+        } else if (newValue == 2) {
+            var tr = '<input class="easyui-textbox" type="text" name="UserTask[' + selectedDay + '][num]" style="width: 50px;" data-options="required:true">个';
+            $.parser.parse($(this).siblings('span').eq(1).html(tr));
+        } else if (newValue == 3) {
+            var tr = '<label id="numName' + selectedDay + '"></label><input type="hidden" name="UserTask[' + selectedDay + '][num]" id="num' + selectedDay + '" data-options="required:true"><a href="javascript:void(0);" onclick="addPacket(' + selectedDay + ');" class="easyui-linkbutton">选择红包</a>';
+            $.parser.parse($(this).siblings('span').eq(1).html(tr));
+        }
+    }
+
+    function onChangeTask(newValue, oldValue) {
+        var taskId = $(this).attr('taskId');
+        if (newValue == 1) {
+            var tr = '<input class="easyui-textbox" type="text" name="Task[' + taskId + '][award_num]" style="width: 50px;" data-options="required:true">分';
+            $.parser.parse($(this).siblings('span').eq(1).html(tr));
+        } else if (newValue == 2) {
+            var tr = '<input class="easyui-textbox" type="text" name="Task[' + taskId + '][award_num]" style="width: 50px;" data-options="required:true">个';
+            $.parser.parse($(this).siblings('span').eq(1).html(tr));
+        } else if (newValue == 3) {
+            var tr = '<label id="numNameTask' + taskId + '"></label><input type="hidden" name="Task[' + taskId + '][award_num]" id="numTask' + taskId + '" data-options="required:true"><a href="javascript:void(0);" onclick="addPacket(\'Task' + taskId + '\');" class="easyui-linkbutton">选择红包</a>';
+            $.parser.parse($(this).siblings('span').eq(1).html(tr));
+        }
+    }
+
+    function submitForm() {
+        $('#sign_form').form({
+            url: "{{ url('user-task/edit') }}",
+            onSubmit:function() {
+                return $(this).form('enableValidation').form('validate');
+            },
+            success: function (data) {
+                var data = eval('('+data+')');
+                if (data.error == 0) {
+                    $.messager.alert('成功', data.message);
+                    parent.location.reload();
+                } else {
+                    $.messager.alert('失败', data.message, 'error');
+                }
+            }
+        });
+        $('#sign_form').submit();
+    }
+
+    function addPacket(days) {
+        day = days;
+        $('#content').html('');
+        $('#packet').combobox({
+            url:"{{ url('active/packet-list') }}",
+            method:'get',
+            valueField: 'id',
+            textField: 'name',
+            onSelect: function(packet) {
+                $.get("{{ url('active/packet-detail') }}", {'id': packet.id}, function(data) {
+                    $('#content').html('');
+                    var strHtml = '<table cellpadding="5"';
+                    $.each(data, function(i, v) {
+                        strHtml += '<tr><td>' + v.name + '</td>';
+                        strHtml += '<td>' + v.desc + '</td></tr>';
+                    });
+                    strHtml += '</table>';
+                    $.parser.parse($(strHtml).appendTo('#content'));
+                });
+            }
+        });
+        $('#dlg-add-packet').window('open');
+    }
+
+    function submitAddPacket() {
+        packetId = $('#packet').combobox('getValue');
+        packetName = $('#packet').combobox('getText');
+        if (!packetId) {
+            $.messager.alert('错误','请选择红包');
+        }
+        $('#numName' + day).html(packetName);
+        $('#num' + day).val(packetId);
+        $('#dlg-add-packet').dialog('close');
+    }
+</script>
+{% endblock %}

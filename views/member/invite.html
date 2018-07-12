@@ -1,0 +1,28 @@
+{% extends '@app/views/base.html' %}
+
+{% block main %}
+
+<table id="listdata" class="easyui-datagrid" title="邀请列表" data-options="singleSelect:false,pagination:true,method:'get',url:'{{  url('member/invite', {id: id})}}',pageSize: 20">
+    <thead>
+        <tr>
+            <th data-options="field:'nickname', width:120, align:'center'" formatter="formatNickname">昵称</th>
+            <th data-options="field:'phone', width:100, align:'center'" formatter="formatNickname">手机</th>
+            <th data-options="field:'email', width:150, align:'center'" formatter="formatNickname">邮箱</th>
+            <th data-options="field:'created_at', width:180" formatter="formatTime">注册时间</th>
+            <th data-options="field:'money', width:100, align:'center'">消费金额</th>
+        </tr>
+    </thead>
+</table>
+
+{% endblock %}
+
+{% block script %}
+<script>
+    function formatTime(val, row) {
+        var newDate_attend = new Date();
+        newDate_attend.setTime(val * 1000);
+        var my_create_time_attend=newDate_attend.format('yyyy-MM-dd hh:mm:ss');
+        return my_create_time_attend;
+    }
+</script>
+{% endblock %}

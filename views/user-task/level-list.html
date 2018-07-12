@@ -1,0 +1,41 @@
+{% extends '@app/views/base.html' %}
+  
+{% block main %}
+<table border="1" cellspacing="0">
+    <thead>
+    <tr>
+        <th width="200px">等级</th>
+        <th width="200px">到达人数</th>
+        <th width="200px">操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for num, item in task %}
+    <tr align="center">
+        <td>{{ item.name }}</td>
+        <td>{{ item.count | default(0) }}</td>
+        <td><a onclick="view(4, 3, 0, {{ num }}, '等级{{ item.name }}')">详情</a></td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+<div id="dlg-view" class="easyui-window" title="查看详情" style="width:1242px;height:600px;padding:10px;overflow:hidden;" data-options="
+            iconCls:'icon-save',
+            closed:true,
+            modal:true,
+            onResize:function(){
+                $(this).window('hcenter');
+            }">
+    <iframe width="100%" height="100%" frameborder="0" id="view_iframe">
+    </iframe>
+</div>
+{% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+    function view(type, level, cate, num, title) {
+        $('#view_iframe').prop('src', "{{ url('user-task/detail') }}"+'?type='+type+'&level='+level+'&cate='+cate+'&num='+num+'&title='+title);
+        $('#dlg-view').window('open');
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,267 @@
+{% extends '@app/views/base.html' %}
+
+{% block css %}
+<style>
+    td {
+        border: 1px solid #C1DAD7;
+        background: #fff;
+        font-size:11px;
+        padding: 6px 6px 6px 12px;
+        color: #4f6b72;
+    }
+    td .alt {
+        background: #F5FAFA;
+        color: #797268;
+    }
+</style>
+{% endblock %}
+
+{% block main %}
+
+<div title="Basic Window"  style="padding:5px;height:auto">
+    <table>
+        <tr>
+            <td>{% if(exchange) %}换货订单号：{{ exchange.id }}  原订单号：{{ detail.id }}{% else %}订单号：{{ detail.id }}{% endif %}</td>
+            <td>商品名称：{{ goodInfo.name }}</td>
+            <td>状态：{% if(detail.status == 2) %}待备货{% elseif(detail.status == 3) %}待发货{% endif %}</td>
+        </tr>
+
+        <tr>
+            <td>商品分类：{{ catName[periodInfo.cat_id] }}</td>
+            <td>商品价格：￥{{ goodInfo.price }}</td>
+            <td>伙购来源：{{ periodTable.source.name }}</td>
+        </tr>
+
+        <tr>
+            <td>伙购码：{{ periodInfo.lucky_code }}</td>
+            <td>会员：{{ detail.user_id.phone }} &nbsp;&nbsp; {{ detail.user_id.email }}</td>
+            <td>伙购时间：{{ periodTable.buy_time }}</td>
+        </tr>
+
+        <tr>
+            <td>当期购买次数：{{ periodTable.buy_num }}次</td>
+            <td>发货方式：第三方发货</td>
+            <td></td>
+        </tr>
+    </table>
+</div>
+
+<div class="easyui-tabs" style="width:600px;height:auto">
+    <div title="收货地址" style="padding:10px">
+        <table>
+            <tr>
+                <td>提交时间：{{ confirm_addr_time|date('Y-m-d H:i:s') }}</td>
+                <td>收货人：{{ detail.ship_name }}</td>
+                <td>联系方式：{{ detail.ship_mobile }}</td>
+            </tr>
+
+            <tr>
+                <td>收货地址：{{ detail.ship_area }}{{ detail.ship_addr }}</td>
+                <td>备注信息：{{ detail.mark_text }}</td>
+                <td></td>
+            </tr>
+
+            <tr>
+                <td>确认人：{{ person[detail.confirm_userid] }}</td>
+                <td>确认时间：{% if(detail.confirm_time) %}{{ detail.confirm_time|date('Y-m-d H:i:s') }}{% else %}暂无{% endif %}</td>
+                <td></td>
+            </tr>
+        </table>
+        <p>{{ detail.remark }}</p>
+    </div>
+    <div title="备货信息" style="padding:10px">
+        {% if(detail.status == 3) %}
+        <table>
+            <tr>
+                <td>备货人：{{ person[detail.prepare_userid] }}</td>
+                <td>备货时间：{{ detail.prepare_time|date('Y-m-d H:i:s') }}</td>
+                <td>发票：{{ detail.bill }}</td>
+            </tr>
+
+            <tr>
+                <td>成本：{{ detail.actual_price }}</td>
+                <td>发货平台：{{ detail.platform }}</td>
+                <td>第三方订单号：{{ detail.third_order }}</td>
+            </tr>
+
+            <tr>
+                <td>规格：{{ detail.standard }}</td>
+                <td>备注：{{ detail.deliver_market }}</td>
+                <td></td>
+            </tr>
+        </table>
+        {% else %}
+        无信息
+        {% endif %}
+    </div>
+</div>
+
+<div id="w" class="easyui-window" title="备货" data-options="closed:true,iconCls:'icon-save',minimizable:false,tools:'#tt'" style="width:480px;height:400px;padding:10px">
+    <div style="padding:10px 0 10px 60px">
+        <table>
+            <tr>
+                <td><span>*</span>备货平台:</td>
+                <td>
+                    <select name="platform" class="easyui-combobox" id="platform">
+                        <option value="京东">京东</option>
+                        <option value="苏宁">苏宁</option>
+                        <option value="天猫">天猫</option>
+                        <option value="亚马逊">亚马逊</option>
+                        <option value="国美">国美</option>
+                        <option value="一号店">一号店</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td><span>*</span>备货单号:</td>
+                <td><input class="easyui-validatebox textbox" type="text" name="order" data-options="required:true"></td>
+            </tr>
+            <tr>
+                <td><span>*</span>成本:</td>
+                <td><input class="easyui-validatebox textbox" type="text" name="price" data-options="required:true"></td>
+            </tr>
+            <tr>
+                <td><span></span>支付方式:</td>
+                <td>
+                    <select name="payment" class="easyui-combobox" id="payment">
+                        <option value="无">无</option>
+                        <option value="京东">京东</option>
+                        <option value="支付宝">支付宝</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td><span></span>发票:</td>
+                <td>
+                    <select name="bill" class="easyui-combobox" id="bill">
+                        <option value="无">无</option>
+                        <option value="普通发票">普通发票</option>
+                        <option value="专业发票">专业发票</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td><span></span>规格:</td>
+                <td><input class="easyui-validatebox textbox" type="text" name="standard"></td>
+            </tr>
+            <tr>
+                <td><span></span>备注:</td>
+                <td><input class="easyui-validatebox textbox" type="text" name="comment"></td>
+            </tr>
+        </table>
+        <input type="hidden" name="id" value="{{ detail.id }}">
+        <a href="javascript:void(0)" class="easyui-linkbutton" onclick="prepare();" style="margin:20px 0 0 150px;text-align: center">备货</a>
+    </div>
+</div>
+
+{% if(detail.status == 2) %}
+<a href="javascript:void(0)" class="easyui-linkbutton get-status" onclick="$('#w').window('open')">备货</a>
+<a href="javascript:void(0)" class="easyui-linkbutton get-status" onclick="sendFail()">备货异常</a>
+{% elseif(detail.status == 3) %}
+<a href="javascript:void(0)" class="easyui-linkbutton get-status" onclick="editOrder()">发货</a>
+<a href="javascript:void(0)" class="easyui-linkbutton get-status" onclick="editOrder()">修改备货信息</a>
+{% endif %}
+
+<div id="tb-user" style="height:auto">
+    <div>
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true" onclick="javascript:$('#dlg-remark').window('open');;">添加备注</a>
+    </div>
+</div>
+
+<div id="dlg-remark" title="添加备注" class="easyui-dialog" style="width:320px;height:auto;padding:10px 20px" closed="true" buttons="#dlg-buttons-remark">
+    <textarea data-options="required:true" class="easyui-textarea" rows="10" cols="34" id="remark">{{ detail.remark }}</textarea>
+</div>
+
+<div id="dlg-buttons-remark" style="text-align:center;padding:5px">
+    <a class="easyui-linkbutton" iconCls="icon-ok" onclick="saveRemark()">确定</a>
+    <a class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg-remark').dialog('close')">取消</a>
+</div>
+
+{% endblock %}
+
+{% block script %}
+<script>
+    var id = "{{ detail.id }}";
+    function saveRemark(){
+        var remark = $('#remark').val();
+        $.post('/order/remark', {'id':id, 'remark':remark}, function(data){
+            if(data == 1){
+                $.messager.alert('成功', '添加成功');
+                setTimeout(function(){window.location.reload()}, 1000);
+            }else{
+                $.messager.alert('错误', '添加失败', 'error');
+                return false;
+            }
+        })
+    }
+
+    function prepare(){
+        var order = $('input[name=order]').val();
+        var price = $('input[name=price]').val();
+        var platform = $('#platform').combobox('getValue');
+        var standard = $('input[name=standard]').val();
+        var comment = $('input[name=comment]').val();
+        var payment = $('#payment').combobox('getValue');
+        var bill = $('#bill').combobox('getValue');
+        var a = /^[0-9a-zA-Z]*$/g;
+        var b = /^[1-9]\d+(\.\d+)?$/;
+
+        if(order == '' || price == ''){
+            alert('订单号和成本不能为空');
+            return false;
+        }
+        if(!a.exec(order)){
+            alert('订单号为字母，数字或字母数字组合');
+            return false;
+        }
+        if(!b.test(price) || price < 10 ){
+            alert('价格格式不正确或价格必须大于10');
+            return false;
+        }
+
+        $.post('/deliver/prepare', {'id':id,'order':order, 'price':price, 'platform':platform, 'standard':standard,
+             'comment':comment, 'bill':bill, 'payment':payment}, function(data){
+            if(data.code == 100){
+                $.messager.alert(data.msg);
+                window.location.reload();
+            }else{
+                $.messager.alert(data.msg);
+                return false;
+            }
+        })
+    }
+
+    function refuse(){
+        $('#dlg-refuse').window('open');
+    }
+
+    function save(){
+        var content = $('#fail').val();
+        var id = "{{ detail.id }}"
+        $.post('/order/confirm', {'id':id, 'confirm_reason':content}, function(data){
+            if(data == 1){
+                alert('驳回成功');
+                window.location.reload();
+            }else{
+                $.messager.alert('驳回失败');
+                return false;
+            }
+        })
+    }
+
+    $('#comfirm').click(function(){
+        var id = "{{ detail.id }}";
+        $.post('{{ url(['/order/confirm-order']) }}', {id: id}, function (data) {
+            if(data == 1){
+                $.messager.alert('确认失败');
+                return false;
+            }else{
+                alert('确认成功');
+                window.location.reload();
+            }
+        })
+    })
+
+</script>
+
+{% endblock %}

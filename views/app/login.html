@@ -1,0 +1,110 @@
+{% extends '@app/views/base.html' %}
+
+{% block main %}
+<div class="easyui-tabs" style="width:500px;height:auto;float: left;" >
+    <span>伙购网</span>
+    <div title="android" style="padding:10px">
+        <form method="post" action="{{ url('app/login') }}">
+            <table cellpadding="5">
+                <input type="hidden" name="id" value="{{huogouAndroidModel.id}}">
+                <input type="hidden" name="system" value="android">
+                <input type="hidden" name="from" value="1">
+                <tr>
+                    <td>QQ:</td>
+                    <td><input type="checkbox" name="content[login_qq]" value="1" {% if(huogouAndroidModel.content.login_qq == 1) %}checked{% endif %}></td>
+                </tr>
+                <tr>
+                    <td>微信:</td>
+                    <td><input type="checkbox" name="content[login_wechat]" value="1" {% if(huogouAndroidModel.content.login_wechat == 1) %}checked{% endif %}></td>
+                </tr>
+                <tr>
+                    <td><input type="hidden" name="system" value="android"><input type="submit" value="提交"></td>
+                    <td></td>
+                </tr>
+            </table>
+        </form>
+    </div>
+    <div title="ios" style="padding:10px">
+        <form method="post" action="{{ url('app/login') }}">
+            <table cellpadding="5">
+                <input type="hidden" name="id" value="{{huogouIosModel.id}}">
+                <input type="hidden" name="system" value="ios">
+                <input type="hidden" name="from" value="1">
+                <tr>
+                    <td>QQ:</td>
+                    <td><input type="checkbox" name="content[login_qq]" value="1" {% if(huogouIosModel.content.login_qq == 1) %}checked{% endif %}></td>
+                </tr>
+                <tr>
+                    <td>微信:</td>
+                    <td><input type="checkbox" name="content[login_wechat]" value="1" {% if(huogouIosModel.content.login_wechat == 1) %}checked{% endif %}></td>
+                </tr>
+                <tr>
+                    <td>屏蔽版本</td>
+                    <td><input type="text" name="content[version]" value="{{ huogouIosModel.content.version }}" id="version"></td>
+                </tr>
+                <tr>
+                    <td><input type="hidden" name="system" value="ios"><input type="submit" value="提交"></td>
+                    <td></td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+
+
+<div class="easyui-tabs" style="width:500px;height:auto;float: left;margin-left: 10px;" >
+    <span>滴滴夺宝</span>
+    <div title="android" style="padding:10px">
+        <form method="post" action="{{ url('app/login') }}">
+            <table cellpadding="5">
+                <input type="hidden" name="id" value="{{didiAndroidModel.id}}">
+                <input type="hidden" name="system" value="android">
+                <input type="hidden" name="from" value="2">
+                <tr>
+                    <td>QQ:</td>
+                    <td><input type="checkbox" name="content[login_qq]" value="1" {% if(didiAndroidModel.content.login_qq == 1) %}checked{% endif %}></td>
+                </tr>
+                <tr>
+                    <td>微信:</td>
+                    <td><input type="checkbox" name="content[login_wechat]" value="1" {% if(didiAndroidModel.content.login_wechat == 1) %}checked{% endif %}></td>
+                </tr>
+                <tr>
+                    <td><input type="hidden" name="system" value="android"><input type="submit" value="提交"></td>
+                    <td></td>
+                </tr>
+            </table>
+        </form>
+    </div>
+    <div title="ios" style="padding:10px">
+        <form method="post" action="{{ url('app/login') }}">
+            <table cellpadding="5">
+                <input type="hidden" name="id" value="{{didiIosModel.id}}">
+                <input type="hidden" name="system" value="ios">
+                <input type="hidden" name="from" value="2">
+                <tr>
+                    <td>QQ:</td>
+                    <td><input type="checkbox" name="content[login_qq]" value="1" {% if(didiIosModel.content.login_qq == 1) %}checked{% endif %}></td>
+                </tr>
+                <tr>
+                    <td>微信:</td>
+                    <td><input type="checkbox" name="content[login_wechat]" value="1" {% if(didiIosModel.content.login_wechat == 1) %}checked{% endif %}></td>
+                </tr>
+                <tr>
+                    <td>屏蔽版本</td>
+                    <td><input type="text" name="content[version]" value="{{ didiIosModel.content.version }}" id="version"></td>
+                </tr>
+                <tr>
+                    <td><input type="hidden" name="system" value="ios"><input type="submit" value="提交"></td>
+                    <td></td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+
+</script>
+{% endblock %}

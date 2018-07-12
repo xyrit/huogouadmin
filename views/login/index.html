@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>{{ app.name }}</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="Cache-Control" content="no-siteapp"/>
+    <link rel="alternate icon" type="image/png" href="{{ app.getAlias('skinUrl') }}/img/favicon.png">
+    <link rel="stylesheet" href="{{ app.getAlias('skinUrl') }}/css/amazeui.min.css"/>
+    <style>
+        .header {
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 200%;
+            color: #333;
+            margin-top: 30px;
+        }
+
+        .header p {
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <div class="am-g">
+            <h1>{{ app.name }}</h1>
+            <p>深圳首页网络科技有限公司</p>
+        </div>
+        <hr/>
+    </div>
+    <div class="am-g">
+        <div class="am-u-lg-3 am-u-md-8 am-u-sm-centered">
+            {{ html.beginForm('', 'post', {'class':'am-form'})|raw }}
+                <div class="am-form-group">
+                    {{ html.activeLabel(model, 'username')|raw }}
+                    {{ html.activeTextInput(model, 'username', {'placeholder':'输入用户名'})|raw }}
+                    {{ html.error(model, 'username', {'class':'am-alert am-alert-danger'})|raw }}
+                </div>
+                <div class="am-form-group">
+                    {{ html.activeLabel(model, 'password')|raw }}
+                    {{ html.activePasswordInput(model, 'password', {'placeholder':'输入密码'})|raw }}
+                    {{ html.error(model, 'password', {'class':'am-alert am-alert-danger'})|raw }}
+                </div>
+                <div class="am-form-group">
+                    {{ html.activeCheckbox(model, 'rememberMe')|raw }}
+                </div>
+            <div class="am-form-group">
+                <input type="button" class="fsyzm" value="发送验证码">
+                <input type="text" name="yzm" class="yzm" placeholder="填写验证码">
+            </div>
+            <div class="am-cf">
+                    {{ html.submitButton('登 录', {'class':'am-btn am-btn-primary am-btn-sm am-fl'})|raw }}
+                </div>
+
+            {{ html.endForm()|raw }}
+        </div>
+        {{ linkpage }}
+    </div>
+    <script type="text/javascript" src="http://libs.baidu.com/jquery/1.9.1/jquery.min.js"></script>
+    <script>
+        $('.fsyzm').click(function () {
+
+            var account = $('#loginform-username').val();
+            $.ajax({
+                type: 'get',
+                url: 'code',
+                data: {
+                    account: account
+                },
+                dataType: 'json',
+                success: function (data) {
+                    alert(data['info'])
+                }
+            });
+
+        })
+    </script>
+</body>
+</html>

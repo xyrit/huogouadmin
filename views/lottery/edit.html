@@ -1,0 +1,255 @@
+{% extends '@app/views/base.html' %}
+
+{% block css %}
+<link href="{{ app.params.skinUrl }}/css/bootstrap.css" rel="stylesheet">
+<link href="{{ app.params.skinUrl }}/css/fileinput.min.css" media="all" rel="stylesheet" type="text/css"/>
+<script src="{{ app.params.skinUrl }}/js/lottery_add.js"></script>
+<style>
+    table tr td:first-child,table tr td:first-child{
+        width:120px;
+    }
+    table tr {
+        margin: 10px;
+    }
+    .file-preview-frame {
+        position: relative;
+    }
+    .product_cover {
+        width: 100px;
+        position: absolute;
+        left: 95px;
+        color: green;
+    }
+    .set_product_cover {
+        width: 120px;
+        position: absolute;
+        left: 68px;
+        color: green;
+        cursor: pointer;
+    }
+</style>
+{% endblock %}
+
+{% block main %}
+<div style="width:100%; padding:10px 60px 20px 60px" style="">
+    {{ html.beginForm('', 'post', {'id':'lottery-form', 'name':'lottery-form'}) | raw }}
+    <table cellpadding="5" width="100%">
+        <tr>
+            <td>活动名称</td>
+            <td><input class="easyui-textbox" name="Lottery[name]" value="{{ model.name }}" data-options="required:true" /></td>
+        </tr>
+        <tr>
+            <td>状态</td>
+            <td>
+                <select class="easyui-combobox" name="Lottery[status]" data-options="required:true,panelHeight:'auto',value:'{{ model.status }}'">
+                    <option value="1">正常</option>
+                    <option value="2">停用</option>
+                    <option value="3">已过期</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>活动起止日期</td>
+            <td><input class="easyui-datetimebox" type="text" name="Lottery[start_time]" data-options="required:true"  value="{{ model.start_time|date('Y-m-d H:i:s') }}"/>到<input class="easyui-datetimebox" type="text" name="Lottery[end_time]" data-options="required:true"  value="{{ model.end_time|date('Y-m-d H:i:s') }}"/></td>
+        </tr>
+        <tr>
+            <td>兑奖有效期</td>
+            <td><input class="easyui-datetimebox" type="text" name="Lottery[validity_start]" data-options="required:true"  value="{{ model.validity_start|date('Y-m-d H:i:s') }}"/>到<input class="easyui-datetimebox" type="text" name="Lottery[validity_end]" value="{{ model.validity_end|date('Y-m-d H:i:s') }}" data-options="required:true" /></td>
+        </tr>
+        <tr>
+            <td>关联URL</td>
+            <td><input class="easyui-textbox" name="Lottery[url]" data-options="required:true, validType:'url'" value="{{ model.url }}"/></td>
+        </tr>
+        <tr>
+            <td>活动说明</td>
+            <td><textarea rows=5 style="width: 370px;" name="Lottery[introduce]">{{ model.introduce }}</textarea></td>
+        </tr>
+        <tr>
+            <td>参与消耗福分</td>
+            <td><input type="radio" name="consume" checked value="0">不消耗 <input type="radio" name="consume" value="1"> 消耗 <input type="text" name="Lottery[consume]" id="num" value="0" disabled style="width:75px;text-align: center;"></td>
+        </tr>
+        <tr>
+            <td>奖品设置</td>
+            <td id="rewards">
+                <input type="button" value="添加奖品" onclick="add()">
+                {% for item in rewards %}
+                <p class="reward-name" data="{{ item.id }}"><span>{{ item.name }}</span> <a href="javascript:void(0);" onclick="editReward(this)">修改</a> <a href="javascript:void(0);" onclick="delReward(this)">删除</a></p>
+                {% endfor %}
+            </td>
+        </tr>
+        <tr style="margin-top:20px;">
+            <td><a href="javascript:void(0)" class="easyui-linkbutton" onclick="submitLotteryForm()" style="width: 80px;">确定</a></td>
+            <td><a href="javascript:void(0)" class="easyui-linkbutton" onclick="cancel();" style="width: 80px;">取消</a></td>
+        </tr>
+    </table>
+    {{ html.endForm() | raw }}
+</div>
+
+<div id="dlg-add" class="easyui-window" title="添加奖品" style="width:500px;height:600px;padding:10px;" data-options="iconCls:'icon-save',closed:true,modal:true,onResize:function(){ $(this).window('hcenter');}">
+    <div style="width:100%; padding:10px 60px 20px 60px">
+        {{ html.beginForm('/lottery/reward', 'post', {'id':'reward-form', 'name':'reward-form', 'enctype':"multipart/form-data"}) | raw }}
+        <table cellpadding="5" width="100%">
+            <tr>
+                <td>奖品名称</td>
+                <td><input class="easyui-textbox" name="Reward[name]" data-options="required:true" /></td>
+            </tr>
+            <tr>
+                <td>内容</td>
+                <td id="content"><input type="button" value="添加实物" onclick="addReward(0)" id="goods" class="button"> <input type="button" value="添加虚拟物品" onclick="addReward(1)" id="packet" class="button"><input type="button" value="添加伙购币" onclick="addReward(3)" id="money" class="button"> <input type="button" value="添加福分" onclick="addReward(4)" id="point"  class="button"> <input type="button" value="添加谢谢" onclick="addReward(2)" id="thank" class="button"></td>
+            </tr>
+            <tr>
+                <td>奖品数量</td>
+                <td><input class="easyui-textbox" name="Reward[num]" data-options="required:true,validType:'integer'" /></td>
+            </tr>
+            <tr>
+                <td>中奖概率</td>
+                <td><input class="easyui-textbox" name="Reward[probability]" data-options="required:true,validType:'intOrFloat'" />%</td>
+            </tr>
+            <tr>
+                <td>奖品图片</td>
+                <td><input class="easyui-filebox" type="text" name="picture" data-options="required:true" ></td>
+            </tr>
+            <tr>
+                <td>奖品图片</td>
+                <td><input class="easyui-filebox" type="text" name="icon" data-options="required:true" ></td>
+            </tr>
+            <tr>
+                <td><a href="javascript:void(0)" class="easyui-linkbutton" onclick="submitRewardForm()" style="width: 80px;">确定</a></td>
+                <td><a href="javascript:void(0)" class="easyui-linkbutton" onclick="clearRewardForm()" style="width: 80px;">取消</a></td>
+            </tr>
+        </table>
+        {{ html.endForm() | raw }}
+    </div>
+    <iframe width="100%" height="100%" frameborder="0" id="add_iframe"></iframe>
+</div>
+
+<!-- 添加实物 -->
+<div id="dlg-goods" class="easyui-window" title="添加实物" style="width:360px;height:300px;padding:10px;" data-options="iconCls:'icon-save',closed:true,modal:true,onResize:function(){ $(this).window('hcenter');}">
+    <div style="text-align: center; margin-top:20px;"><input class="easyui-textbox" id="goods_name" data-options="required:true"></div>
+    <div style="text-align: center; margin-top:20px;"><a href="javascript:void(0)" class="easyui-linkbutton" onclick="addContent('goods')" style="width: 80px;">确定</a></div>
+</div>
+
+<!-- 添加谢谢 -->
+<div id="dlg-thank" class="easyui-window" title="添加谢谢" style="width:360px;height:300px;padding:10px;" data-options="iconCls:'icon-save',closed:true,modal:true,onResize:function(){ $(this).window('hcenter');}">
+    <div style="text-align: center; margin-top:20px;"><input class="easyui-textbox" id="thank_name" data-options="required:true"></div>
+    <div style="text-align: center; margin-top:20px;"><a href="javascript:void(0)" class="easyui-linkbutton" onclick="addContent('thank')" style="width: 80px;">确定</a></div>
+</div>
+
+<!-- 添加伙购币 -->
+<div id="dlg-money" class="easyui-window" title="添加伙购币" style="width:360px;height:300px;padding:10px;" data-options="iconCls:'icon-save',closed:true,modal:true,onResize:function(){ $(this).window('hcenter');}">
+    <div style="text-align: center; margin-top:20px;"><input class="easyui-textbox" id="money_name" data-options="required:true,"></div>
+    <div style="text-align: center; margin-top:20px;"><a href="javascript:void(0)" class="easyui-linkbutton" onclick="addContent('money')" style="width: 80px;">确定</a></div>
+</div>
+
+<!-- 添加福分 -->
+<div id="dlg-point" class="easyui-window" title="添加福分" style="width:360px;height:300px;padding:10px;" data-options="iconCls:'icon-save',closed:true,modal:true,onResize:function(){ $(this).window('hcenter');}">
+    <div style="text-align: center; margin-top:20px;"><input class="easyui-textbox" id="point_name" data-options="required:true,"></div>
+    <div style="text-align: center; margin-top:20px;"><a href="javascript:void(0)" class="easyui-linkbutton" onclick="addContent('point')" style="width: 80px;">确定</a></div>
+</div>
+
+<!-- 添加红包 -->
+<div id="dlg-packet" title="红包列表" class="easyui-dialog" style="width:600px;height:auto;padding:10px 20px" modal="true" closed="true" buttons="#dlg-buttons-packet">
+    <span>红包列表<select class="easyui-combobox" id="packets" editable="true" style="width:100px;"></select></span><br />
+    <span id="packet_content"></span>
+</div>
+
+<div id="dlg-buttons-packet" style="text-align:center;padding:5px">
+    <a class="easyui-linkbutton" iconCls="icon-ok" onclick="addContent('packet')">确定</a>
+    <a class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg-packet').dialog('close')">取消</a>
+</div>
+
+<div id="dlg-edit" class="easyui-window" title="修改奖品" style="width:400px;height:300px;padding:10px;" data-options="iconCls:'icon-save',closed:true,modal:true,onResize:function(){ $(this).window('hcenter');}">
+    <iframe width="100%" height="100%" frameborder="0" id="edit_iframe"></iframe>
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+    $(function(){
+        $('.button').css('display', 'block');
+    })
+
+    function editReward(nowP){
+        var id = $(nowP).parent('p').attr('data');
+        $('#edit_iframe').prop('src',  'reward-edit?id='+id);
+        $('#dlg-edit').window('open');
+    }
+
+    function cancel(){
+        $.get("{{ url('lottery/cancel') }}", {'id': '{{ model.id }}'},function(){})
+        parent.location.reload();
+    }
+
+    $.extend($.fn.validatebox.defaults.rules, {
+        integer : {// 验证整数
+            validator : function(value) {
+                return /^\d+?$/i.test(value);
+            },
+            message : '请输入整数'
+        },
+        intOrFloat : {// 验证整数或小数
+            validator : function(value) {
+                return /^\d+(\.\d+)?$/i.test(value);
+            },
+            message : '请输入数字，并确保格式正确'
+        },
+    })
+
+    function delReward(nowP){
+        $.messager.confirm('Confirm', '您确定删除该奖品吗？', function(r) {
+            if (r) {
+                var id = $(nowP).parent('p').attr('data');
+                $(nowP).parent('p').remove();
+
+                $.get("{{ url('lottery/set-del') }}", {'id':id}, function(){})
+            }
+        });
+    }
+
+    $(function(){
+        var point = '{{ model.consume }}';
+        if(point != 0){
+            $('input[name="consume"]:first').attr('checked', false);
+            $('input[name="consume"]:last').attr('checked', true);
+            $('#num').attr('disabled', false);
+            $('#num').val(point);
+        }
+    })
+
+    $('input[name="consume"]').change(function(){
+        var val = $('input[name="consume"]:checked').val();
+        var point = '{{ model.consume }}';
+        if(val == 0){
+            $('#num').val(0);
+            $('#num').attr('disabled', true);
+        }else{
+            $('#num').val(point);
+            $('#num').attr('disabled', false);
+        }
+    })
+
+    $.extend($.fn.validatebox.defaults.rules, {
+        integer : {// 验证整数
+            validator : function(value) {
+                return /^\d+?$/i.test(value);
+            },
+            message : '请输入整数'
+        },
+        intOrFloat : {// 验证整数或小数
+            validator : function(value) {
+                return /^\d+(\.\d+)?$/i.test(value);
+            },
+            message : '请输入数字，并确保格式正确'
+        },
+    })
+
+    function add(){
+        clearRewardForm();
+        $('.goods-name').remove();
+        $('#dlg-add').window('open');
+        $('.button').css('display', 'block');
+    }
+
+
+</script>
+{% endblock %}

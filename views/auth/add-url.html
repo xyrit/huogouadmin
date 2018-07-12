@@ -1,0 +1,45 @@
+{% extends '@app/views/base.html' %}
+
+{% block main %}
+
+<style type="text/css">
+    .inputText{
+        border:1px solid #95B8E7;
+        height: 24px;
+        line-height: 24px;
+        width:140px;
+    }
+    .combo{
+        height: 24px !important;
+        line-height: 24px;
+    }
+</style>
+
+<div class="easyui-panel" title="新增路由">
+    <div style="padding:10px 0 10px 60px">
+        {{ html.beginForm('', 'post', {'class':'am-form am-form-horizontal'}) | raw }}
+        <table>
+            <tr>
+                <td><span>*</span>{{ html.activeLabel(model, 'url', {})|raw }}:</td>
+                <td>
+                    <select name="Route[url]" class="easyui-combobox">
+                        {% for item in urllist %}
+                        <option value="{{ item }}">{{ item }}</option>
+                        {% endfor %}
+                    </select>
+                    {{ html.error(model, 'url', {'class':'am-alert am-alert-danger'})|raw }}
+                </td>
+            </tr>
+
+            <tr>
+                <td>&nbsp;</td>
+                <td>
+                    <input type="submit" class="easyui-linkbutton" >
+                </td>
+            </tr>
+        </table>
+        {{ html.endForm() | raw }}
+    </div>
+</div>
+
+{% endblock %}

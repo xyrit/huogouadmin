@@ -1,0 +1,180 @@
+{% extends '@app/views/base.html' %}
+
+{% block css %}
+<style>
+    td {
+        border: 1px solid #C1DAD7;
+        background: #fff;
+        font-size: 11px;
+        padding: 6px 6px 6px 12px;
+        color: #4f6b72;
+    }
+
+    td label {
+        background-color: #dddddd;
+        width: 100px;
+        height: 35px;
+        border-collapse: collapse;
+    }
+
+    td .alt {
+        background: #F5FAFA;
+        color: #797268;
+    }
+
+    .box span {
+        font-size: 12px;
+        padding: 6px 6px 6px 12px;
+        color: #4f6b72;
+    }
+
+    .good {
+        border-collapse: collapse;
+    }
+
+    .panel-body div {
+        padding: 10px 0;
+    }
+
+</style>
+{% endblock %}
+
+{% block main %}
+<div title="Basic Window" style="padding:5px;height:auto" class="box">
+    <div style="padding: 10px 0;">
+        <span>订单状态：{{detail.status_name}}</span><span>订单编号：{{ detail.id }}</span><span>订单生成时间：{{ detail.create_time|date('Y-m-d H:i:s') }}</span>
+    </div>
+
+    <table class="good">
+        <tr>
+            <td>商品名称</td>
+            <td>商品面额</td>
+            <td>商品编码</td>
+            <td>商品品牌</td>
+            <td>伙购价</td>
+            <td>购买大小</td>
+            <td>当前期号</td>
+            <td>是否是虚拟商品</td>
+            <td>发货方式</td>
+        </tr>
+
+        <tr>
+            <td>{{goodInfo.name}}</td>
+            <td>{{goodInfo.face_value}}</td>
+            <td>{{ goodInfo.bn }}</td>
+            <td>{{ goodInfo.brand_id }}</td>
+            <td>￥{{ goodInfo.price }}</td>
+            <td> {% if detail.size==1 %} 大 {% else %}小{% endif %}</td>
+            <td>{{ periodinfo.period_no}}</td>
+            <td>{{ goodInfo.is_virtual}}</td>
+            <td>{{ goodInfo.delivery_id}}</td>
+        </tr>
+    </table>
+
+    <table style="display: block" cellpadding="5">
+        <tr>
+            <td><label>订单号：</label>{{ detail.id }}</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+
+        <tr>
+            <td>商品分类：{{cat_name}}</td>
+            <td>发货方式：{{ goodInfo.delivery_id}}</td>
+            <td>商品价格：￥{{ goodInfo.price }}</td>
+            <td></td>
+            <td></td>
+
+        </tr>
+        <tr>
+            <td>中奖码：{{ periodinfo.lucky_code}}</td>
+            <td>会员：{{ detail.user_id.username }}</td>
+            <td>桌号：{{ detail.desk_id }}</td>
+            <td>期数：{{ detail.period_id }}</td>
+            <td>开奖时间：{{ periodinfo.end_time | date('Y-m-d H:i:s')}}</td>
+        </tr>
+        <tr>
+            <td>会员手机号：{{ user.phone}}</td>
+            <td>会员邮箱：{{ user.email}}</td>
+            <td>平台:{% if user.from==1 %} 伙购平台 {% else %}滴滴平台{% endif %}</td>
+            <td></td>
+            <td></td>
+        </tr>
+    </table>
+</div>
+<br/>
+<div class="desc">
+    {% for key,item in desc %}
+    {{item.desc}}----{{item.time}} <br>
+    {% endfor %}
+    <textarea class="in_desc"></textarea>
+</div>
+<div><input type="button" class="savedesc" value="保存备注"></div>
+{% if(detail.status == 3 and detail.confirm == 1) %}
+<a href="javascript:void(0)" class="easyui-linkbutton get-status" data-id="all" id="send-show"
+   onclick="deliver()">发货</a>
+<a href="javascript:void(0)" class="easyui-linkbutton get-status" data-id="all" onclick="refuse()">驳回</a>
+{% endif %}
+{% endblock %}
+{% block script %}
+<script>
+    var status = "{{ detail.status }}";
+    var id = "{{ detail.id }}";
+    var exchange = "{{ detail.is_exchange }}";
+
+    $('#address-show').click(function () {
+        $('#address-info').prop('src', '/win/address?id=' + id);
+        $('#address').window('open');
+    })
+
+    $('#deliver-show').click(function () {
+        if (exchange != 0) $('#deliver-info').prop('src', '/win/deliver?id=' + id + '&exchange=' + exchange + '&type=special');
+        else $('#deliver-info').prop('src', '/win/deliver?id=' + id + '&type=special');
+        $('#deliver').window('open');
+    })
+
+    //    $('#send-show').click(function () {
+    //        if (exchange != 0) $('#send-info').prop('src', '/win/send?id=' + id + '&exchange=' + exchange);
+    //        else $('#send-info').prop('src', '/win/send?id=' + id);
+    //        $('#send').window('open');
+    //    })
+    function deliver() {
+        var id = "{{detail.id}}";
+        $.post('/pkorder/deliver', {'id': id}, function (data) {
+            //data = eval('(' + data + ')');
+            if (data.error == 0) {
+                alert(data.message)
+                //    $.messager.alert('成功', data.message);
+                // setTimeout(function(){window.parent.window.load();window.parent.window.reloadgrid();}, 2000);
+            } else {
+                alert(data.message)
+                //    $.messager.alert(data.message);
+                return false;
+            }
+        })
+    }
+    $('.savedesc').click(function () {
+        var desc = $('.in_desc').val();
+        var id = "{{detail.id}}";
+        $.post('/pkorder/save-desc', {'id': id, 'desc': desc}, function (data) {
+            alert(data.message);
+            if (data.error == 0) {
+                location.reload();
+            }
+        })
+    })
+    function refuse() {
+        var id = "{{detail.id}}";
+        $.post('/pkorder/refuse', {'id': id}, function (data) {
+            alert(data.message);
+            if (data.error == 0) {
+                location.reload();
+            }
+        })
+    }
+
+</script>
+
+{% endblock %}

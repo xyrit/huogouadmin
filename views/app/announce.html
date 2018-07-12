@@ -1,0 +1,211 @@
+{% extends '@app/views/base.html' %}
+
+{% block main %}
+<div style="margin:20px 0 10px 0;"></div>
+
+<div class="easyui-tabs" style="width:500px;height:auto;float: left;" >
+    <span>伙购网</span>
+    <div title="android" style="padding:10px">
+        <form id="android_huogou" method="post">
+            <table cellpadding="5">
+                <input type="hidden" name="id" value="{{huogouAndroidModel.id}}">
+                <input type="hidden" name="system" value="android">
+                <input type="hidden" name="from" value="1">
+                <tr>
+                    <td>公告标题:</td>
+                    <td><input class="easyui-textbox" type="text" name="content[an_title]" value="{{ huogouAndroidModel.content.an_title }}" data-options="required:true"></td>
+                </tr>
+                <tr>
+                    <td>最低版本号:</td>
+                    <td><input class="easyui-textbox" type="text" name="content[an_code]" value="{{ huogouAndroidModel.content.an_code }}" >（版本格式：2.0.1，不填为不限制）</td>
+                </tr>
+
+                <tr>
+                    <td>内容:</td>
+                    <td><textarea rows=5 name="content[an_des]" class="textarea easyui-validatebox">{{ huogouAndroidModel.content.an_des }}</textarea></td>
+                </tr>
+                <tr>
+                    <td>类型:</td>
+                    <td><input type="radio" name="content[type]" value="1" {% if(huogouAndroidModel.content.type == 1) %}checked{% endif %}>H5 <input type="radio" name="content[type]" value="2" {% if(huogouAndroidModel.content.type == 2) %}checked{% endif %}>原生</td>
+                </tr>
+                <tr>
+                    <td>公告链接:</td>
+                    <td><input class="easyui-textbox" name="content[an_url]" value="{{ huogouAndroidModel.content.an_url}}"  data-options="validType:'url'"></td>
+                </tr>
+                <tr>
+                    <td>第N次公告:</td>
+                    <td><input class="easyui-textbox" type="text" name="content[an_num]" value="{{ huogouAndroidModel.content.an_num }}" >（每次需要发新公告，必须手动+1，不然别弄！）</td>
+                </tr>
+                <tr>
+                    <td>是否启用:</td>
+                    <td><input type="checkbox" name="status" value="1" {% if(huogouAndroidModel.status == 1) %}checked{%  endif %}></td>
+                </tr>
+
+            </table>
+        </form>
+        <div style="text-align:center;padding:5px">
+            <a href="javascript:void(0)" class="easyui-linkbutton" onclick="submitForm('android_huogou')">提交</a>
+        </div>
+    </div>
+    <div title="ios" style="padding:10px">
+        <form id="ios_huogou" method="post">
+            <table cellpadding="5">
+                <input type="hidden" name="id" value="{{huogouIosModel.id}}">
+                <input type="hidden" name="system" value="ios">
+                <input type="hidden" name="from" value="1">
+                <tr>
+                    <td>公告标题:</td>
+                    <td><input class="easyui-textbox" type="text" name="content[an_title]" value="{{ huogouIosModel.content.an_title }}" data-options="required:true"></td>
+                </tr>
+                <tr>
+                    <td style="width:88px;">最低版本号:</td>
+                    <td><input class="easyui-textbox" type="text" name="content[an_code]"  value="{{ huogouIosModel.content.an_code }}"  style="width:171px;">（版本格式：2.0.1，不填为不限制）</td>
+                </tr>
+
+                <tr>
+                    <td>内容:</td>
+                    <td><textarea rows=5 name="content[an_des]" class="textarea easyui-validatebox" style="height:60px;width:171px;">{{ huogouIosModel.content.an_des }}</textarea></td>
+                </tr>
+                <tr>
+                    <td>类型:</td>
+                    <td><input type="radio" name="content[type]" value="1" {% if(huogouIosModel.content.type == 1) %}checked{% endif %}>H5 <input type="radio" name="content[type]" value="2" {% if(huogouIosModel.content.type == 2) %}checked{% endif %}>原生</td>
+                </tr>
+                <tr>
+                    <td>公告链接:</td>
+                    <td><input class="easyui-textbox" name="content[an_url]" value="{{ huogouIosModel.content.an_url}}"  data-options="validType:'url'"></td>
+                </tr>
+                <tr>
+                    <td>第N次公告:</td>
+                    <td><input class="easyui-textbox" type="text" name="content[an_num]" value="{{ huogouIosModel.content.an_num }}" >（每次需要发新公告，必须手动+1，不然别弄！）</td>
+                </tr>
+                <tr>
+                    <td>是否启用:</td>
+                    <td><input type="checkbox" name="status" value="1"  {% if(huogouIosModel.status == 1) %}checked{%  endif %}></td>
+                </tr>
+            </table>
+        </form>
+        <div style="text-align:center;padding:5px">
+            <a href="javascript:void(0)" class="easyui-linkbutton" onclick="submitForm('ios_huogou')">提交</a>
+            <!--<a href="" class="easyui-linkbutton" id="send">推送</a>-->
+        </div>
+    </div>
+</div>
+
+<div class="easyui-tabs" style="width:500px;height:auto;float: left;margin-left: 10px;" >
+    <span>滴滴夺宝</span>
+    <div title="android" style="padding:10px">
+        <form id="android_didi" method="post">
+            <table cellpadding="5">
+                <input type="hidden" name="id" value="{{didiAndroidModel.id}}">
+                <input type="hidden" name="system" value="android">
+                <input type="hidden" name="from" value="2">
+                <tr>
+                    <td>公告标题:</td>
+                    <td><input class="easyui-textbox" type="text" name="content[an_title]" value="{{ didiAndroidModel.content.an_title }}" data-options="required:true"></td>
+                </tr>
+                <tr>
+                    <td style="width:88px;">最低版本号:</td>
+                    <td><input class="easyui-textbox" type="text" name="content[an_code]"  value="{{ didiAndroidModel.content.an_code }}" style="width:171px;">（版本格式：2.0.1，不填为不限制）</td>
+                </tr>
+
+                <tr>
+                    <td>内容:</td>
+                    <td><textarea rows=5 name="content[an_des]" class="textarea easyui-validatebox" style="height:60px;width:171px;">{{ didiAndroidModel.content.an_des }}</textarea></td>
+                </tr>
+                <tr>
+                    <td>类型:</td>
+                    <td><input type="radio" name="content[type]" value="1" {% if(didiAndroidModel.content.type == 1) %}checked{% endif %}>H5 <input type="radio" name="content[type]" value="2" {% if(didiAndroidModel.content.type == 2) %}checked{% endif %}>原生</td>
+                </tr>
+
+                <tr>
+                    <td>公告链接:</td>
+                    <td><input class="easyui-textbox" name="content[an_url]" value="{{ didiAndroidModel.content.an_url}}"  data-options="validType:'url'"></td>
+                </tr>
+                <tr>
+                    <td>第N次公告:</td>
+                    <td><input class="easyui-textbox" type="text" name="content[an_num]" value="{{ didiAndroidModel.content.an_num }}" >（每次需要发新公告，必须手动+1，不然别弄！）</td>
+                </tr>
+                <tr>
+                    <td>是否启用:</td>
+                    <td><input type="checkbox" name="status" value="1"  {% if(didiAndroidModel.status == 1) %}checked{%  endif %}></td>
+                </tr>
+            </table>
+        </form>
+        <div style="text-align:center;padding:5px">
+            <a href="javascript:void(0)" class="easyui-linkbutton" onclick="submitForm('android_didi')">提交</a>
+        </div>
+    </div>
+    <div title="ios" style="padding:10px">
+        <form id="ios_didi" method="post">
+            <table cellpadding="5">
+                <input type="hidden" name="id" value="{{didiIosModel.id}}">
+                <input type="hidden" name="system" value="ios">
+                <input type="hidden" name="from" value="2">
+                <tr>
+                    <td>公告标题:</td>
+                    <td><input class="easyui-textbox" type="text" name="content[an_title]" value="{{ didiIosModel.content.an_title }}" data-options="required:true"></td>
+                </tr>
+                <tr>
+                    <td style="width:88px;">最低版本号:</td>
+                    <td><input class="easyui-textbox" type="text" name="content[an_code]"  value="{{ didiIosModel.content.an_code }}"  style="width:171px;">  （版本格式：2.0.1，不填为不限制）</td>
+                </tr>
+
+                <tr>
+                    <td>内容:</td>
+                    <td><textarea rows=5 name="content[an_des]" class="textarea easyui-validatebox" style="height:60px;width:171px;">{{ didiIosModel.content.an_des }}</textarea></td>
+                </tr>
+                <tr>
+                    <td>类型:</td>
+                    <td><input type="radio" name="content[type]" value="1" {% if(didiIosModel.content.type == 1) %}checked{% endif %}>H5 <input type="radio" name="content[type]" value="2" {% if(didiIosModel.content.type == 2) %}checked{% endif %}>原生</td>
+                </tr>
+                <tr>
+                    <td>公告链接:</td>
+                    <td><input class="easyui-textbox" name="content[an_url]" value="{{ didiIosModel.content.an_url}}"  data-options="validType:'url'"></td>
+                </tr>
+                <tr>
+                    <td>第N次公告:</td>
+                    <td><input class="easyui-textbox" type="text" name="content[an_num]" value="{{ didiIosModel.content.an_num }}" >（每次需要发新公告，必须手动+1，不然别弄！）</td>
+                </tr>
+                <tr>
+                    <td>是否启用:</td>
+                    <td><input type="checkbox" name="status" value="1"  {% if(didiIosModel.status == 1) %}checked{%  endif %}></td>
+                </tr>
+            </table>
+        </form>
+        <div style="text-align:center;padding:5px">
+            <a href="javascript:void(0)" class="easyui-linkbutton" onclick="submitForm('ios_didi')">提交</a>
+            <!--<a href="" class="easyui-linkbutton" id="send">推送</a>-->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+
+    function submitForm(id)
+    {
+        $('#'+id).form({
+            url: '/app/announce',
+            onSubmit: function(param){
+                var isValid = $(this).form('validate');
+                if (!isValid){
+                    $.messager.progress('close');	// 如果表单是无效的则隐藏进度条
+                }
+                return isValid;	// 返回false终止表单提交
+            },
+            success: function (data) {
+                data = eval('(' + data + ')');
+                if (data.error == 0) {
+                    $.messager.alert('成功', data.message);
+                    setTimeout(function(){location.reload();}, 2000);
+                } else {
+                    $.messager.alert('失败', data.message);
+                    return false;
+                }
+            }
+        });
+        $('#'+id).submit();
+    }
+</script>
+{% endblock %}

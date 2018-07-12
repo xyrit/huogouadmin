@@ -1,0 +1,150 @@
+{% extends '@app/views/base.html' %}
+
+{% block css %}
+<link href="{{ app.params.skinUrl }}/css/bootstrap.css" rel="stylesheet">
+<link href="{{ app.params.skinUrl }}/css/fileinput.min.css" media="all" rel="stylesheet" type="text/css"/>
+<style>
+    table tr td:first-child,table tr td:first-child{
+        width:120px;
+        height:50px;
+    }
+    table tr {
+        margin: 10px;
+    }
+    .file-preview-frame {
+        position: relative;
+    }
+    .product_cover {
+        width: 100px;
+        position: absolute;
+        left: 95px;
+        color: green;
+    }
+    .set_product_cover {
+        width: 120px;
+        position: absolute;
+        left: 68px;
+        color: green;
+        cursor: pointer;
+    }
+</style>
+{% endblock %}
+
+{% block main %}
+<div style="width:100%; padding:10px 60px 20px 60px">
+    {{ html.beginForm('/lottery/reward', 'post', {'id':'reward-form', 'name':'reward-form', 'enctype':"multipart/form-data"}) | raw }}
+    <table cellpadding="5" width="100%">
+        <tr>
+            <td>奖品名称</td>
+            <td><input class="easyui-textbox" name="Reward[name]" data-options="required:true" /></td>
+        </tr>
+        <tr>
+            <td>内容</td>
+            <td id="content"><input type="button" value="添加实物" onclick="add(0)"> <input type="button" value="添加虚拟物品" onclick="add(1)"></td>
+        </tr>
+        <tr>
+            <td>奖品数量</td>
+            <td><input class="easyui-textbox" name="Reward[num]" data-options="required:true,validType:'integer'" /></td>
+        </tr>
+        <tr>
+            <td>中奖概率</td>
+            <td><input class="easyui-textbox" name="Reward[probability]" data-options="required:true,validType:'intOrFloat'" />%</td>
+        </tr>
+        <tr>
+            <td>奖品图片</td>
+            <td><input class="easyui-filebox" type="text" name="picture" data-options="required:true" ></td>
+        </tr>
+        <tr>
+            <td><a href="javascript:void(0)" class="easyui-linkbutton" onclick="submitForm()" style="width: 80px;">确定</a></td>
+            <td><a href="javascript:void(0)" class="easyui-linkbutton" onclick="clearForm()" style="width: 80px;">取消</a></td>
+        </tr>
+    </table>
+    {{ html.endForm() | raw }}
+</div>
+
+<div id="dlg-add" class="easyui-window" title="添加实物" style="width:360px;height:300px;padding:10px;" data-options="iconCls:'icon-save',closed:true,modal:true,onResize:function(){ $(this).window('hcenter');}">
+    <div style="text-align: center; margin-top:20px;"><input class="easyui-textbox" id="name" data-options="required:true"></div>
+    <div style="text-align: center; margin-top:20px;"><a href="javascript:void(0)" class="easyui-linkbutton" onclick="addGoods()" style="width: 80px;">确定</a></div>
+</div>
+
+{% endblock %}
+
+{% block js %}
+<script>
+    $.extend($.fn.validatebox.defaults.rules, {
+    integer : {// 验证整数
+        validator : function(value) {
+            return /^[+]?[1-9]+\d*$/i.test(value);
+        },
+        message : '请输入整数'
+    },
+    intOrFloat : {// 验证整数或小数
+        validator : function(value) {
+            return /^\d+(\.\d+)?$/i.test(value);
+        },
+        message : '请输入数字，并确保格式正确'
+    },
+})
+
+    function submitForm(){
+        $('#reward-form').form({
+            onSubmit: function(param){
+                var isValid = $(this).form('validate');
+                if (!isValid){
+                    $.messager.progress('close');	// 如果表单是无效的则隐藏进度条
+                }
+                var json = {};
+                var jsonLen = 0;
+                $(".goods-name").each(function(k){
+                    json[k] = $(this).children('span').html();
+                    jsonLen ++;
+                });
+                var jsonArr = JSON.stringify(json);
+                if(jsonLen == 0) $.messager.alert('失败', '奖品不能为空');
+                param.content = jsonArr;
+                return isValid;	// 返回false终止表单提交
+            },
+            success: function (data) {
+                data = eval('(' + data + ')');
+                if (data.error == 0) {
+                    $.messager.alert('成功', data.message);
+
+                    setTimeout(function(){parent.location.reload()}, 2000);
+                } else {
+                    $.messager.alert('失败', data.message);
+                    return false;
+                }
+            }
+        });
+        $('#reward-form').submit();
+    }
+
+    function addGoods(){
+        var name = $('#name').textbox('getValue');
+        if(name == ''){
+            $.messager.alert('错误', '实物名称不能为空', 'error');
+            return;
+        }
+        $('#content').append('<p class="goods-name"><span>'+name+'</span>&nbsp;&nbsp;<a href="javascript:void(0);" onclick="del(this)">删除</a></p>');
+        $('#name').textbox('setValue', '');
+        $('#dlg-add').window('close');
+    }
+
+    function del(nowP){
+        $(nowP).parent().remove();
+    }
+
+    //添加奖品
+    function add(req){
+        if(req == 0){
+            $('#dlg-add').window('open');
+        }else if(req == 1){
+
+        }
+    }
+
+    function clearForm(){
+        $('#reward-form').form('clear');
+    }
+</script>
+{% endblock %}

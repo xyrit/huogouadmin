@@ -1,0 +1,76 @@
+{% extends '@app/views/base.html' %}
+  
+{% block main %}
+
+{% if title %}<h2>{{ title }}</h2>{% endif %}
+<div class="search">
+    {% if date %}<span>时间：{{ date }}</span><br />{% endif %}
+    <span>会员名 <input class="easyui-textbox" type="text" name="account" id="account"></span>
+    <span>终端来源
+        <select class="easyui-combobox" id="source" name="source" data-options="panelHeight:'auto'">
+            <option value="0">所有</option>
+            <option value="4">Android</option>
+            <option value="3">IOS</option>
+        </select>
+    </span>
+    {% if date == 0 %}
+    <span>时间
+        <input class="easyui-datetimebox" style="width:200px" name="startTime" id="startTime"> 到
+        <input class="easyui-datetimebox" style="width:200px" name="endTime" id="endTime">
+    </span>
+    {% endif %}
+    <a href="javascript:void(0);" onclick="reloadgrid();" class="easyui-linkbutton" iconCls="icon-search">搜索</a>
+</div>
+
+<table id="listdata" class="easyui-datagrid" title="详情列表" data-options="singleSelect:false,pagination:true,method:'get',url:'{{  url('user-task/detail', {'type': type, 'level': level, 'cate': cate, 'num': num, 'date': date})}}',pageSize: 20">
+    <thead>
+    <tr>
+        <th data-options="field:'nickname', width:200, align:'center'" formatter="formatName">会员名</th>
+        <th data-options="field:'content', width:200, align:'center'">完成任务</th>
+        <th data-options="field:'source', width:200, align:'center'" formatter="formatSource">终端来源</th>
+        <th data-options="field:'created_at', width:200, align:'center'" formatter="formatTime">时间</th>
+    </tr>
+    </thead>
+</table>
+
+{% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+    function reloadgrid(){
+        var queryParams = $('#listdata').datagrid('options').queryParams;
+        queryParams.account = $('#account').val();
+        queryParams.source	= $('#source').combobox('getValue');
+        {% if date == 0 %}
+            queryParams.startTime = $('#startTime').datetimebox('getValue');
+            queryParams.endTime	= $('#endTime').datetimebox('getValue');
+        {% endif %}
+        $('#listdata').datagrid('options').queryParams = queryParams;
+        $("#listdata").datagrid('reload');
+    }
+
+    function formatName(val, row) {
+        result = '';
+
+        if (row.nickname) {
+            result += '昵称：' + row.nickname + '<br />';
+        }
+        if (row.phone) {
+            result += '手机号：' + row.phone + '<br />';
+        }
+        if (row.email) {
+            result += '邮箱：' + row.email;
+        }
+
+        return result;
+    }
+
+    function formatSource(val, row) {
+        if (val == 3) {
+            return 'IOS';
+        } else {
+            return 'Android';
+        }
+    }
+</script>
+{% endblock %}

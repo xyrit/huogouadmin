@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="language" content="zh_cn" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <title>{% block title %}{% endblock %}</title>
+
+    <link rel="stylesheet" type="text/css" href="{{ app.params.skinUrl }}/js/jquery-easyui-1.4.4/themes/gray/easyui.css">
+    <link rel="stylesheet" type="text/css" href="{{ app.params.skinUrl }}/js/jquery-easyui-1.4.4/themes/icon.css">
+    {% block css %}
+    <!--<link rel="stylesheet" type="text/css" href="{{ app.params.skinUrl }}/css/default.css">-->
+    <style>
+        .search {margin-bottom: 5px;padding: 5px;height: auto;border: 1px solid gainsboro;}
+        .search span {margin-right: 5px;}
+    </style>
+    {% endblock %}
+</head>
+
+<body>
+
+{% block main %}{% endblock %}
+<script src="{{ app.params.skinUrl }}/js/jquery-easyui-1.4.4/jquery.min.js" type="text/javascript"></script>
+<script src="{{ app.params.skinUrl }}/js/jquery-easyui-1.4.4/jquery.easyui.min.js" type="text/javascript"></script>
+<script src="{{ app.params.skinUrl }}/js/jquery-easyui-1.4.4/locale/easyui-lang-zh_CN.js" type="text/javascript"></script>
+<script src="{{ app.params.skinUrl }}/js/common.js" type="text/javascript"></script>
+<script src="{{ app.params.skinUrl }}/js/combotree.js" type="text/javascript"></script>
+
+{% block js %}{% endblock %}
+{% block script %}{% endblock %}
+</body>
+</html>

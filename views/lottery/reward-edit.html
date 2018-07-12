@@ -1,0 +1,69 @@
+{% extends '@app/views/base.html' %}
+
+{% block main %}
+<div>
+    <div>
+        {{ html.beginForm('', 'post', {'id':'reward-edit', 'name':'reward-form', 'enctype':"multipart/form-data"}) | raw }}
+        <table cellpadding="5" width="100%">
+            <tr>
+                <td>奖品名称</td>
+                <td><input class="easyui-textbox" name="name" data-options="required:true" value="{{ model.name }}"/></td>
+            </tr>
+            <tr>
+                <td>奖品数量</td>
+                <td><input class="easyui-textbox" name="num" value="{{ model.num }}" data-options="required:true,validType:'integer'" /></td>
+            </tr>
+            <tr>
+                <td>奖品图片</td>
+                <td><input class="easyui-filebox" type="text" name="picture" data-options="required:true" value="{{ model.basename }}"></td>
+            </tr>
+            <tr>
+                <td>弹出图</td>
+                <td><input class="easyui-filebox" type="text" name="icon" data-options="required:true" value="{{ model.icon }}"></td>
+            </tr>
+            <tr>
+                <td>中奖概率</td>
+                <td><input class="easyui-textbox" name="probability"  value="{{ model.probability }}" data-options="required:true,validType:'intOrFloat'" />%</td>
+            </tr>
+            <tr>
+                <td><a href="javascript:void(0)" class="easyui-linkbutton" onclick="submitRewardForm()" style="width: 80px;">确定</a></td>
+            </tr>
+        </table>
+        {{ html.endForm() | raw }}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block js %}
+<script>
+    $.extend($.fn.validatebox.defaults.rules, {
+        integer : {// 验证整数
+            validator : function(value) {
+                return /^\d+?$/i.test(value);
+            },
+            message : '请输入整数'
+        },
+    })
+
+    function submitRewardForm(){
+        var url = "{{ url('lottery/reward-edit') }}?id=" + "{{ model.id }}";
+        $('#reward-edit').form({
+            url: url,
+            onSubmit:function(){
+                return $(this).form('enableValidation').form('validate');
+            },
+            success: function (data) {
+                data = eval('(' + data + ')');
+                if (data.error == 0) {
+                    $.messager.alert('成功', data.message);
+                    setTimeout(function(){parent.location.reload()}, 2000);
+                } else {
+                    $.messager.alert('失败', data.message, 'error');
+                }
+            }
+        });
+        $('#reward-edit').submit();
+    }
+</script>
+{% endblock %}

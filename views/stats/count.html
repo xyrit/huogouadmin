@@ -1,0 +1,31 @@
+{% extends '@app/views/base.html' %}
+
+{% block main %}
+<div id="p" class="easyui-panel" title="统计数据" style="width:500px;padding:10px;font-size:14px;">
+    <p style="font-size:14px">财务数据</p>
+    <ul>
+        <li>总支付金额：{{ return.pay_money }}元</li>
+        <li>总充值金额：{{ return.money }}元</li>
+        <li>账号总余额：{{ return.balance }}元</li>
+        <li>佣金余额：{{ return.commission }}元</li>
+    </ul>
+
+    <p style="font-size:14px">今日数据</p>
+    <ul>
+        <li>今日新增会员：{{ return.reg_num }}个</li>
+        <li>今日收入：{{ return.today_payment|default(0) }}元</li>
+        <li>今日充值：{{ return.today_recharge|default(0) }}元</li>
+        <li>今日开奖：{{ return.luckyTotal }}次</li>
+        <li>今日发货：{{ return.deliverTotal }}次</li>
+    </ul>
+
+    <p style="font-size:14px">昨日数据</p>
+    <ul>
+        <li>昨日新增会员：{{ yesterday.reg_num }}个</li>
+        <li>昨日收入：{{ yesterday.pay_money|default(0) }}元</li>
+        <li>昨日充值：{{ yesterday.recharge_money|default(0) }}元</li>
+        <li>昨日开奖：{{ yesterday.lottery_num }}次</li>
+        <li>昨日发货：{{ yesterday.deliver_num }}次</li>
+    </ul>
+</div>
+{% endblock %}

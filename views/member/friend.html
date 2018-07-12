@@ -1,0 +1,39 @@
+{% extends '@app/views/base.html' %}
+
+{% block main %}
+<div class="search">
+    <span>时间
+        <input class="easyui-datetimebox" style="width:200px" name="startTime" id="startTime"> 到
+        <input class="easyui-datetimebox" style="width:200px" name="endTime" id="endTime">
+    </span>
+    <a href="javascript:void(0);" onclick="reloadgrid();" class="easyui-linkbutton" iconCls="icon-search">搜索</a>
+</div>
+<table id="listdata" class="easyui-datagrid" title="伙购列表" data-options="singleSelect:false,pagination:true,method:'get',url:'{{ url('member/friend', {id: id}) }}',pageSize: 20">
+    <thead>
+    <tr>
+        <th data-options="field:'user_name', width:200, align:'center'">用户名</th>
+        <th data-options="field:'level_name', width:200, align:'center'">等级</th>
+        <th data-options="field:'created_at', width:200, align:'center'" formatter="formatTime">结交时间</th>
+    </tr>
+    </thead>
+</table>
+
+{% endblock %}
+
+{% block script %}
+<script>
+    function reloadgrid(){
+        var queryParams = $('#listdata').datagrid('options').queryParams;
+        queryParams.startTime = $('#startTime').datetimebox('getValue');
+        queryParams.endTime	= $('#endTime').datetimebox('getValue');
+        $('#listdata').datagrid('options').queryParams = queryParams;
+        $("#listdata").datagrid('reload');
+    }
+    function formatTime(val, row) {
+        var newDate_attend = new Date();
+        newDate_attend.setTime(val * 1000);
+        var my_create_time_attend=newDate_attend.format('yyyy-MM-dd hh:mm:ss');
+        return my_create_time_attend;
+    }
+</script>
+{% endblock %}

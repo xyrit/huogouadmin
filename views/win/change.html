@@ -1,0 +1,51 @@
+<link rel="stylesheet" type="text/css" href="{{ app.params.skinUrl }}/js/jquery-easyui-1.4.4/themes/default/easyui.css">
+<link rel="stylesheet" type="text/css" href="{{ app.params.skinUrl }}/js/jquery-easyui-1.4.4/themes/icon.css">
+
+<script src="{{ app.params.skinUrl }}/js/jquery-easyui-1.4.4/jquery.min.js" type="text/javascript"></script>
+<script src="{{ app.params.skinUrl }}/js/jquery-easyui-1.4.4/jquery.easyui.min.js" type="text/javascript"></script>
+<script src="{{ app.params.skinUrl }}/js/jquery-easyui-1.4.4/locale/easyui-lang-zh_CN.js" type="text/javascript"></script>
+<script src="{{ app.params.skinUrl }}/js/order-detail.js" type="text/javascript"></script>
+
+<style>
+    table td{border: solid 1px #a0c6e5; }
+</style>
+
+<div title="Basic Window"  style="padding:5px;height:auto;width:100%" class="box">
+    <table cellpadding="10" border="0" cellspacing="1">
+        <tr>
+            <td>原单号</td><td>{{ deliver.order_id }}</td>
+            <td>确认人</td><td>{{ person[deliver.confirm_userid] }}</td>
+            <td>确认时间</td><td>{{ deliver.confirm_time|date('Y-m-d H:i:s') }}</td>
+        </tr>
+        <tr>
+            <td>发货方式</td><td>{{ deliver.send }}</td>
+            <td>备货平台</td><td>{{ deliver.platform }}</td>
+            <td>采购价格</td><td>{{ deliver.price }}</td>
+        </tr>
+        <tr>
+            <td>第三方订单号</td><td>{{ deliver.third_order }}</td>
+            <td>规格</td><td>{{ deliver.standard }}</td>
+            <td>发票</td><td>{{ deliver.bill }}</td>
+        </tr>
+        <tr>
+            <td>发票号</td><td>{{ deliver.bill_order }}</td>
+            <td>备货人</td><td>{{ person[deliver.prepare_userid] }}</td>
+            <td>备货时间</td><td>{{ deliver.prepare_time|date('Y-m-d H:i:s') }}</td>
+        </tr>
+        <tr>
+            <td>快递公司</td><td>{{ deliver.deliver_company }}</td>
+            <td>快递单号</td><td>{{ deliver.deliver_order }}</td>
+            <td>快递费</td><td>{{ deliver.deliver_cost }}</td>
+        </tr>
+        <tr>
+            <td>发货人</td><td>{{ person[deliver.deliver_userid] }}</td>
+            <td>发货时间</td><td>{{ deliver.deliver_time|date('Y-m-d H:i:s') }}</td>
+            <td></td><td></td>
+        </tr>
+        <tr>
+            <td>换货人</td><td>{{ person[deliver.change_adminid] }}</td>
+            <td>换货时间</td><td>{{ deliver.change_time|date('Y-m-d H:i:s') }}</td>
+            <td></td><td></td>
+        </tr>
+    </table>
+</div>

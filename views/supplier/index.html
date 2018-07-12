@@ -1,0 +1,134 @@
+{% extends '@app/views/base.html' %}
+
+{% block main %}
+
+<div class="search">
+    <span>供应商名称
+        <input class="easyui-textbox" type="text" name="name" id="name">
+    </span>
+    <a href="javascript:void(0);" onclick="reloadgrid();" class="easyui-linkbutton" iconCls="icon-search">搜索</a>
+</div>
+
+<table id="listdata"  class="easyui-datagrid" title="供应商列表" data-options="toolbar:'#tb-user',singleSelect:true,pagination:true,method:'get',url:'{{  url('supplier/index')}}',mode:'local',pageSize:20">
+    <thead>
+    <tr>
+        <th data-options="field:'name', width:150, align:'center'">供应商名称</th>
+        <th data-options="field:'contact', width:100, align:'center'">联系人</th>
+        <th data-options="field:'contact_way', width:100, align:'center'">联系方式</th>
+        <th data-options="field:'address', width:200, align:'center'">详细地址</th>
+        <th data-options="field:'product_num', width:100, align:'center'">商品数目</th>
+        <th data-options="field:'created_at', width:180, align:'center'" formatter="formatTime">创建时间</th>
+    </tr>
+    </thead>
+</table>
+
+<div id="tb-user" style="height:auto">
+    <div>
+        {% if add == 1 %}
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true" onclick="add()">新增</a>
+        {% endif %}
+        {% if edit == 1 %}
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-edit',plain:true" onclick="edit()">编辑</a>
+        {% endif %}
+        {% if view == 1 %}
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-tip',plain:true" onclick="view()">详情</a>
+        {% endif %}
+        {% if del == 1 %}
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-no',plain:true" onclick="del()">删除</a>
+        {% endif %}
+    </div>
+</div>
+
+<div id="dlg-add" class="easyui-window" title="新增供应商" style="width:1198px;height:750px;padding:10px;overflow:hidden;" data-options="
+            iconCls:'icon-save',
+            closed:true,
+            modal:true,
+            onResize:function(){
+                $(this).window('hcenter');
+            }">
+    <iframe width="100%" height="100%" frameborder="0" id="add_iframe">
+    </iframe>
+</div>
+
+<div id="dlg-edit" class="easyui-window" title="编辑供应商" style="width:1198px;height:750px;padding:10px;overflow:hidden;" data-options="
+            iconCls:'icon-save',
+            closed:true,
+            modal:true,
+            onResize:function(){
+                $(this).window('hcenter');
+            }">
+    <iframe width="100%" height="100%" frameborder="0" id="edit_iframe">
+    </iframe>
+</div>
+
+<div id="dlg-view" class="easyui-window" title="供应商详情" style="width:1198px;height:750px;padding:10px;overflow:hidden;" data-options="
+            iconCls:'icon-save',
+            closed:true,
+            modal:true,
+            onResize:function(){
+                $(this).window('hcenter');
+            }">
+    <iframe width="100%" height="100%" frameborder="0" id="view_iframe">
+    </iframe>
+</div>
+
+{% endblock %}
+
+{% block js %}
+<script>
+    function reloadgrid(){
+        var queryParams = $('#listdata').datagrid('options').queryParams;
+        queryParams.name = $('#name').val();
+        $('#listdata').datagrid('options').queryParams = queryParams;
+        $("#listdata").datagrid('reload');
+    }
+
+    function add() {
+        $('#add_iframe').prop('src', "{{ url('supplier/add') }}");
+        $('#dlg-add').window('open');
+    }
+
+    function edit() {
+        var selRow = $('#listdata').datagrid('getSelected');
+        if (!selRow) {
+            $.messager.alert('错误','请选择一行');
+            return false;
+        }
+        $('#edit_iframe').prop('src', "{{ url('supplier/edit') }}" + '?id=' + selRow.id);
+        $('#dlg-edit').window('open');
+    }
+
+    function view() {
+        var selRow = $('#listdata').datagrid('getSelected');
+        if (!selRow) {
+            $.messager.alert('错误','请选择一行');
+            return false;
+        }
+        $('#view_iframe').prop('src', "{{ url('supplier/view') }}" + '?id=' + selRow.id);
+        $('#dlg-view').window('open');
+    }
+
+    function del() {
+        var selRow = $('#listdata').datagrid('getSelected');
+        if (!selRow) {
+            $.messager.alert('错误','请选择一行');
+            return false;
+        }
+
+        $.messager.confirm('Confirm', '确认删除吗?', function(r) {
+            if (r) {
+                $.post("{{ url('supplier/del') }}", {'id':selRow.id}, function(data) {
+                    if (data.error) {
+                        $.messager.alert('错误', data.message, 'error');
+                    } else {
+                        $.messager.alert('成功', data.message);
+                        reloadgrid();
+                    }
+                }, 'json');
+            }
+        });
+    }
+
+</script>
+{% endblock %}
+

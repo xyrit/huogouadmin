@@ -1,0 +1,37 @@
+{% extends '@app/views/base.html' %}
+
+{% block main %}
+<table id="listdata"  class="easyui-datagrid" title="抽奖列表" data-options="toolbar:'#tb-user',singleSelect:true,pagination:true,method:'get',url:'{{ url('lottery/join')}}?id={{ id }}',pageSize:10">
+    <thead>
+    <tr>
+        <th data-options="field:'id', width:50, align:'center'">序号</th>
+        <th data-options="field:'user_id', width:200, align:'center'">用户名</th>
+        <th data-options="field:'created_at', width:200, align:'center'" formatter="formatTime">参与时间</th>
+        <th data-options="field:'status', width:100, align:'center'" formatter="formatStatus">状态</th>
+        <th data-options="field:'reward_id', width:300, align:'center'" formatter="formatReward">中奖名称</th>
+    </tr>
+    </thead>
+</table>
+{% endblock %}
+
+{% block js %}
+<script>
+    function formatReward(val, row)
+    {
+        if(row.status == 0) return '';
+        else return val.name;
+    }
+
+    function formatUsername(val, row)
+    {
+        return val.phone + '<br />' + val.email;
+    }
+
+    function formatStatus(val, row)
+    {
+        if(val == 0) return '未中奖';
+        else return '已中奖';
+    }
+
+</script>
+{% endblock %}

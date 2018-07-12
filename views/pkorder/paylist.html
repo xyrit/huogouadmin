@@ -1,0 +1,99 @@
+{% extends '@app/views/base.html' %}
+
+{% block main %}
+<div class="search">
+    <span>开始时间
+        <input class="easyui-datetimebox" style="width:200px" name="startTime" id="startTime"> 到
+        <input class="easyui-datetimebox" style="width:200px" name="endTime" id="endTime">
+    </span>
+    <span>用户手机<input class="easyui-textbox" type="text" name="account" id="account"></span>
+    <span>平台
+    <select name="from" id="from">
+        <option value="0">全部</option>
+        <option value="1">伙购</option>
+        <option value="2">滴滴</option>
+    </select></span>
+
+    <span>获奖订单<input class="easyui-textbox" type="text" name="orderid" id="orderid"></span>
+    <a href="javascript:void(0);" onclick="reloadgrid();" class="easyui-linkbutton" iconCls="icon-search">搜索</a>
+
+</div>
+<div class="datagrid-toolbar" id="tb-user" style="height: auto;">
+    <div>
+        <a id="" group="" href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain"
+           data-options="iconCls:'icon-edit',plain:true" onclick="edit()"><span class="l-btn-left l-btn-icon-left"><span
+                class="l-btn-text">查看</span></span></a>
+    </div>
+</div>
+<table id="listdata" class="easyui-datagrid" title="PK购买列表"
+       data-options="toolbar:'#tb-user',singleSelect:true,pagination:true,method:'get',url:'{{url('pkorder/pay-list')}}',nowrap:false,rownumbers: false">
+    <thead>
+    <tr>
+        <th data-options="field:'id', width:150, align:'center'">编号</th>
+        <th data-options="field:'user_id', width:180, align:'center'">用户ID</th>
+        <th data-options="field:'phone', width:180, align:'center'">用户手机</th>
+        <th data-options="field:'email', width:180, align:'center'">用户Email</th>
+        <th data-options="field:'nickname', width:180, align:'center'">获奖用户昵称</th>
+        <th data-options="field:'product_id', width:180, align:'center'">商品id</th>
+        <th data-options="field:'period_id', width:180, align:'center'">期数id</th>
+        <th data-options="field:'desk_id', width:180, align:'center'">卓号</th>
+        <th data-options="field:'status', width:180, align:'center'">订单状态</th>
+        <th data-options="field:'ship_mobile', width:150, align:'center'">手机号</th>
+        <th data-options="field:'last_modified', width:180, align:'center'" formatter="formatTime">更新时间</th>
+    </tr>
+    </thead>
+</table>
+<div id="dlg-edit" class="easyui-window" title="编辑商品" style="width:1242px;height:750px;padding:10px;overflow:hidden;"
+     data-options="
+            iconCls:'icon-save',
+            closed:true,
+            modal:true,
+            onResize:function(){
+                $(this).window('hcenter');
+            }">
+    <iframe width="100%" height="100%" frameborder="0" id="edit_iframe">
+    </iframe>
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+
+    function edit() {
+        var selRow = $('#listdata').datagrid('getSelected');
+
+        if (!selRow) {
+            $.messager.alert('错误', '请选择一个');
+            return false;
+        }
+        $('#edit_iframe').prop('src', "{{ url('pkorder/view') }}" + '?id=' + selRow.id);
+
+        $('#dlg-edit').window('open');
+    }
+    function dataexcel() {
+        var start_time = $('#startTime').datetimebox('getValue');
+        var end_time = $('#endTime').datetimebox('getValue');
+        var orderid = $('#orderid').val();
+        var account = $('#account').val();
+        window.location.href = "/virtual/index?excel=virtual&start_time=" + start_time + '&end_time=' + end_time + '&orderid=' + orderid + '&account=' + account;
+    }
+
+    function reloadgrid() {
+        var queryParams = $('#listdata').datagrid('options').queryParams;
+        queryParams.startTime = $('#startTime').datetimebox('getValue');
+        queryParams.endTime = $('#endTime').datetimebox('getValue');
+        queryParams.endTime = $('#endTime').datetimebox('getValue');
+        queryParams.account = $('#account').val();
+        queryParams.orderid = $('#orderid').val();
+        queryParams.from = $('#from').val();
+        queryParams.status = $('#status').val();
+        $('#listdata').datagrid('options').queryParams = queryParams;
+        $("#listdata").datagrid('reload');
+    }
+    function formatTime(val, row) {
+        return new Date(parseInt(val) * 1000).toLocaleString();
+    }
+
+
+</script>
+{% endblock %}

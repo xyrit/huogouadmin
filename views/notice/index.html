@@ -1,0 +1,70 @@
+{% extends '@app/views/base.html' %}
+{% block main %}
+
+
+<div id="tb-user" style="height:auto">
+  <div>
+    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-edit',plain:true"
+       onclick="edit()">编辑</a>
+
+  </div>
+</div>
+
+<table title="通知模版" id="listdata" class="easyui-datagrid"
+       data-options="toolbar:'#tb-user',rownumbers:true,singleSelect:true,pagination:true,method:'get',url:'{{ url('/notice/index') }}',rownumbers: false">
+  <thead>
+  <tr>
+
+    <th data-options="field:'id', align:'center'" width="100">ID</th>
+    <th data-options="field:'desc', align:'center'" width="100">描述</th>
+    <th data-options="field:'ways', align:'center'" width="100">通知方式</th>
+    <th data-options="field:'statusname', align:'center'" width="100">状态</th>
+    <th data-options="field:'updated_at', align:'center'" width="100">更新时间</th>
+    <th data-options="field:'op_user', align:'center'" width="100">操作人</th>
+
+  </tr>
+
+  </thead>
+</table>
+
+<div id="dlg-edit" class="easyui-window" title="编辑模版" style="width:1242px;height:750px;padding:10px;overflow:hidden;"
+     data-options="
+            iconCls:'icon-save',
+            closed:true,
+            modal:true,
+            onResize:function(){
+                $(this).window('hcenter');
+            }">
+  <iframe width="100%" height="100%" frameborder="0" id="edit_iframe">
+  </iframe>
+</div>
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+  $(function () {
+    $("#coupon_type li").click(function () {
+      $(this).addClass('tree-node-selected').siblings().removeClass('tree-node-selected');
+    })
+  })
+  function choose() {
+    var type_id = $(".tree-node-selected").attr('value');
+    $('#coupon-edit').prop('src', 'add?type_id=' + type_id);
+    $('#dlg-view').window('open');
+  }
+
+
+  function edit() {
+    var selRow = $('#listdata').datagrid('getSelections');
+    //console.log();return false;
+    if (selRow.length != 1) {
+      $.messager.alert('错误', '请选择一个会员');
+      return false;
+    }
+    $('#edit_iframe').prop('src', "{{ url('notice/edit')}}" + '?id=' + selRow[0].id);
+    $('#dlg-edit').window('open');
+  }
+</script>
+{% endblock %}
+
+

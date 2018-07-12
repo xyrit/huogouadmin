@@ -1,0 +1,71 @@
+<link rel="stylesheet" type="text/css" href="{{ app.params.skinUrl }}/js/jquery-easyui-1.4.4/themes/default/easyui.css">
+<link rel="stylesheet" type="text/css" href="{{ app.params.skinUrl }}/js/jquery-easyui-1.4.4/themes/icon.css">
+
+<script src="{{ app.params.skinUrl }}/js/jquery-easyui-1.4.4/jquery.min.js" type="text/javascript"></script>
+<script src="{{ app.params.skinUrl }}/js/jquery-easyui-1.4.4/jquery.easyui.min.js" type="text/javascript"></script>
+<script src="{{ app.params.skinUrl }}/js/jquery-easyui-1.4.4/locale/easyui-lang-zh_CN.js" type="text/javascript"></script>
+<script src="{{ app.params.skinUrl }}/js/order-detail.js" type="text/javascript"></script>
+
+<style>
+ table td{font-size:12px;}
+</style>
+
+<div title="Basic Window" style="padding:5px;height:auto;width:100%;" id="deliver">
+    {% if(model.status == 0) %}
+    {{ html.beginForm('', 'post', {'class':'am-form am-form-horizontal', 'id':'address-form'}) | raw }}
+    <table cellpadding="10">
+        <tr>
+            <td>选择区域</td>
+            <td>
+                <select id="prov" name="prov" data-options="required:true"></select>
+                <select id="city" name="city" data-options="required:true"></select>
+                <select id="area" name="area" data-options="required:true"></select>
+            </td>
+        </tr>
+        <tr>
+            <td>详细地址</td>
+            <td><input class="easyui-textbox" type="text" name="addr" data-options="required:true"></td>
+        </tr>
+        <tr>
+            <td>收货人</td>
+            <td><input class="easyui-textbox" type="text" name="name" data-options="required:true"></td>
+        </tr>
+        <tr>
+            <td>联系电话</td>
+            <td><input class="easyui-textbox" type="text" name="phone" data-options="required:true,validType:'phoneRex'"></td>
+        </tr>
+        <tr>
+            <td>送货时间</td>
+            <td>
+                <select class="easyui-combobox" style="width:170px;" name="time">
+                    <option value="时间不限">时间不限</option>
+                    <option value="周一至周五">周一至周五</option>
+                    <option value="周末及公众假日">周末及公众假日</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>
+            </td>
+            <td>
+                <input type="submit" class="easyui-linkbutton" onclick="saveAddress();" style="width:80px;height: 25px;">
+            </td>
+        </tr>
+    </table>
+    {{ html.endForm() | raw }}
+    {% endif %}
+</div>
+
+<script>
+    var id = "{{ model.id }}";
+    getAreaList(0, 'prov');
+    $('#prov').change(function(){
+        pid = $(this).children('option:selected').val();
+        getAreaList(pid, 'city');
+    });
+
+    $('#city').change(function(){
+        pid = $(this).children('option:selected').val();
+        getAreaList(pid, 'area');
+    });
+</script>

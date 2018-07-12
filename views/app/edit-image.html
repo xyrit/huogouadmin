@@ -1,0 +1,81 @@
+{% extends '@app/views/base.html' %}
+
+{% block main %}
+<div>
+    {{ html.beginForm('', 'post', {'class':'am-form am-form-horizontal', 'id':'submitForm', 'enctype':"multipart/form-data"}) | raw }}
+        <table cellpadding="5">
+            <table cellpadding="5">
+                <tr>
+                    <td>站点</td>
+                    <td>
+                        <select id="image-from" name="from">
+                            <option value="1" {% if model.from=="1" %}selected{% endif %}>伙购网</option>
+                            <option value="2" {% if model.from=="2" %}selected{% endif %}>滴滴夺宝</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>图片:</td>
+                    <td><input class="easyui-filebox" name="picture" data-options="prompt:'选择图片'"><img src="{{ model.content.image_src }}" width="40" height="40"></td>
+                </tr>
+                <tr>
+                    <td>图片链接:</td>
+                    <td><input class="easyui-textbox" type="text" name="content[image_link]" value="{{ model.content.image_link }}"></td>
+                </tr>
+                <tr>
+                    <td>文件描述:</td>
+                    <td><input class="easyui-textbox" type="text" name="content[image_title]"  data-options="required:true" value="{{ model.content.image_title }}"></td>
+                </tr>
+                <tr>
+                    <td>开始时间:</td>
+                    <td><input class="easyui-datetimebox" type="text" name="content[start_time]" value="{{ model.content.start_time }}"></td>
+                </tr>
+                <tr>
+                    <td>结束时间:</td>
+                    <td><input class="easyui-datetimebox" type="text" name="content[end_time]" value="{{ model.content.end_time }}"></td>
+                </tr>
+                <tr>
+                    <td>系统:</td>
+                    <td><input type="radio" name="system" value="android" {% if(model.system == 'android') %}checked{% endif %}>Android<input type="radio" name="system" value="ios" {% if(model.system == 'ios') %}checked{% endif %}>Ios</td>
+                </tr>
+                <tr>
+                    <td>是否启用:</td>
+                    <td><input type="checkbox" name="status" value="1"  {% if(model.status == '1') %}checked{% endif %}></td>
+                </tr>
+            </table>
+        </table>
+    {{ html.endForm() | raw }}
+    <div style="text-align:center;padding:5px">
+        <a href="javascript:void(0)" class="easyui-linkbutton" onclick="submitForm()">提交</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+    function submitForm()
+    {
+        $('#submitForm').form({
+            url: '/app/edit?type=image&id='+"{{ model.id }}",
+            onSubmit: function(param){
+                var isValid = $(this).form('validate');
+                if (!isValid){
+                    $.messager.progress('close');	// 如果表单是无效的则隐藏进度条
+                }
+                return isValid;	// 返回false终止表单提交
+            },
+            success: function (data) {
+                data = eval('(' + data + ')');
+                if (data.error == 0) {
+                    $.messager.alert('成功', data.message);
+                    setTimeout(function(){parent.location.reload()}, 2000);
+                } else {
+                    $.messager.alert('失败', data.message);
+                    return false;
+                }
+            }
+        });
+        $('#submitForm').submit();
+    }
+</script>
+{% endblock %}

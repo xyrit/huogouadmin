@@ -1,0 +1,96 @@
+{% extends '@app/views/base.html' %}
+
+{% block main %}
+<div>
+    <form id="edit-index-btn" method="post" enctype="multipart/form-data">
+        <table cellpadding="5">
+            <tr>
+                <td>站点</td>
+                <td>
+                    <select  name="from">
+                        <option value="1" {% if model.from=="1" %}selected{% endif %}>伙购网</option>
+                        <option value="2" {% if model.from=="2" %}selected{% endif %}>滴滴夺宝</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>按钮类型</td>
+                <td>
+                    <select name="content[type]">
+                        {% for val,text in targetTypes %}
+                        <option value="{{val}}" {% if model.content.type==val %}selected{% endif %}>{{text}}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>按钮链接:</td>
+                <td><input class="easyui-textbox" type="text" name="content[url]" value="{{model.content.url}}" data-options="required:true"></td>
+            </tr>
+            <tr>
+                <td>按钮文字:</td>
+                <td><input class="easyui-textbox" type="text" name="content[text]" value="{{model.content.text}}"  data-options="required:true"></td>
+            </tr>
+            <tr>
+                <td>按钮位置:</td>
+                <td>
+                    <select name="content[index]">
+                        <option value="1" {% if model.content.index==1 %}selected{% endif %}>位置一</option>
+                        <option value="2" {% if model.content.index==2 %}selected{% endif %}>位置二</option>
+                        <option value="3" {% if model.content.index==3 %}selected{% endif %}>位置三</option>
+                        <option value="4" {% if model.content.index==4 %}selected{% endif %}>位置四</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>图片</td>
+                <td><input class="easyui-filebox" type="text" name="picture" ></td>
+            </tr>
+            <tr>
+                <td>hover图片</td>
+                <td><input class="easyui-filebox" type="text" name="picture2" ></td>
+            </tr>
+            <tr>
+                <td>系统:</td>
+                <td><input type="radio" name="system" value="android" {% if(model.system == 'android') %}checked{% endif %}>Android<input type="radio" name="system" value="ios" {% if(model.system == 'ios') %}checked{% endif %}>IOS</td>
+            </tr>
+            <tr>
+                <td>是否启用:</td>
+                <td><input type="checkbox" name="status" value="1" {% if(model.status == '1') %}checked{% endif %}></td>
+            </tr>
+        </table>
+    </form>
+    <div style="text-align:center;padding:5px">
+        <a href="javascript:void(0)" class="easyui-linkbutton" onclick="submitForm()">提交</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+    function submitForm()
+    {
+        $('#edit-index-btn').form({
+            url: '/app/edit?type=index-btn&id='+"{{ model.id }}",
+            onSubmit: function(param){
+                var isValid = $(this).form('validate');
+                if (!isValid){
+                    $.messager.progress('close');	// 如果表单是无效的则隐藏进度条
+                }
+                return isValid;	// 返回false终止表单提交
+            },
+            success: function (data) {
+                data = eval('(' + data + ')');
+                if (data.error == 0) {
+                    $.messager.alert('成功', data.message);
+                    setTimeout(function(){parent.location.reload()}, 2000);
+                } else {
+                    $.messager.alert('失败', data.message);
+                    return false;
+                }
+            }
+        });
+        $('#edit-index-btn').submit();
+    }
+</script>
+{% endblock %}

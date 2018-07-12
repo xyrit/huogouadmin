@@ -1,0 +1,101 @@
+{% extends '@app/views/base.html' %}
+
+{% block main %}
+<div>
+    <form id="edit-share" method="post">
+        <table cellpadding="5">
+            <tr>
+                <td>站点</td>
+                <td>
+                    <select  name="from">
+                        <option value="1" {% if model.from=="1" %}selected{% endif %}>伙购网</option>
+                        <option value="2" {% if model.from=="2" %}selected{% endif %}>滴滴夺宝</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>分享类型:</td>
+                <td>
+                    <select class="easyui-combobox" data-options="panelHeight:'auto'" name="content[share_type]" id="type">
+                        <option value="product" {% if(model.content.share_type == 'product') %}selected{% endif %}>获得商品</option>
+                        <option value="share" {% if(model.content.share_type == 'share') %}selected{% endif %}>晒单</option>
+                        <option value="zhongjiang" {% if(model.content.share_type == 'zhongjiang') %}selected{% endif %}>中奖</option>
+                        <option value="free" {% if(model.content.share_type == 'free') %}selected{% endif %}>0元购</option>
+                        <option value="lottery" {% if(model.content.share_type == 'lottery') %}selected{% endif %}>抽奖</option>
+                        <option value="invite" {% if(model.content.share_type == 'invite') %}selected{% endif %}>邀请</option>
+                        <option value="act_order" {% if(model.content.share_type == 'act_order') %}selected{% endif %}>活动奖品</option>
+                        <option value="newhand" {% if(model.content.share_type=='newhand') %}selected{% endif %}>新手引导</option>
+                        <option value="userwin" {% if(model.content.share_type=='userwin') %}selected{% endif %}>用户中奖</option>
+                        <option value="pk" {% if(model.content.share_type=='pk') %}selected{% endif %}>pk场</option>
+
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>分享标题:</td>
+                <td><input class="easyui-textbox" type="text" name="content[share_name]" value="{{ model.content.share_name }}"  data-options="required:true"></td>
+            </tr>
+            <tr>
+                <td>分享链接:</td>
+                <td><input class="easyui-textbox" type="text" name="content[share_link]" value="{{ model.content.share_link }}"  data-options="required:true"></td>
+            </tr>
+            <tr>
+                <td>分享内容:</td>
+                <td><input class="easyui-textbox" name="content[share_desc]" value="{{ model.content.share_desc }}" ></td>
+            </tr>
+            <tr>
+                <td>分享图片:</td>
+                <td><input class="easyui-textbox" type="text" name="content[share_img]" value="{{ model.content.share_img }}" ></td>
+            </tr>
+            <tr>
+                <td>系统:</td>
+                <td><input type="radio" name="system" value="android" {% if(model.system == 'android') %}checked{% endif %}>Android<input type="radio" name="system" value="ios" {% if(model.system == 'ios') %}checked{% endif %}>Ios</td>
+            </tr>
+            <tr>
+                <td>是否启用:</td>
+                <td><input type="checkbox" name="status" value="1"  {% if(model.status == '1') %}checked{% endif %}></td>
+            </tr>
+            <tr>
+                <td>是否只获取分享链接:</td>
+                <td><input type="radio" name="content[share_only_link]" value="1"  {% if model.content.share_only_link == 1 %}checked{% endif %}>是<input type="radio" name="content[share_only_link]" value="0" {% if model.content.share_only_link == 0 %}checked{% endif %}>否</td>
+            </tr>
+        </table>
+    </form>
+    <div style="text-align:center;padding:5px">
+        <a href="javascript:void(0)" class="easyui-linkbutton" onclick="submitForm()">提交</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+    $(function(){
+        $('#type').combobox('setValue', '{{ model.content.share_type }}')
+    })
+
+    function submitForm()
+    {
+        $('#edit-share').form({
+            url: '/app/edit?type=share&id='+"{{ model.id }}",
+            onSubmit: function(param){
+                var isValid = $(this).form('validate');
+                if (!isValid){
+                    $.messager.progress('close');	// 如果表单是无效的则隐藏进度条
+                }
+                return isValid;	// 返回false终止表单提交
+            },
+            success: function (data) {
+                data = eval('(' + data + ')');
+                if (data.error == 0) {
+                    $.messager.alert('成功', data.message);
+                    setTimeout(function(){parent.location.reload()}, 2000);
+                } else {
+                    $.messager.alert('失败', data.message);
+                    return false;
+                }
+            }
+        });
+        $('#edit-share').submit();
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,249 @@
+{% extends '@app/views/base.html' %}
+
+{% block main %}
+<style>
+    table { cellspacing: 5px;border-collapse:collapse; }
+    table tr td {word-break: break-all; padding: 13px; width: 230px;}
+    table tr td:first-child{ width: 100px; display: inline-block;}
+    table tr.tsTr{border-top: 1px solid #ccc;border-bottom: 1px solid #ccc;}
+    table tr.tsTr td,table tr.tsTr td div,table tr.tsTr td p{ width: 230px;vertical-align: bottom; overflow: hidden;}
+    .easyui-linkbutton{ padding: 0 20px;}
+    /*table tr td:nth-child(1) { width: 660px; word-break: break-all; }*/
+</style>
+{{ html.beginForm('', 'post', {'class':'am-form am-form-horizontal', 'id':'detailForm'}) | raw }}
+<table border="0" cellspacing="0" cellpadding="0">
+    <tr>
+        <td>订单号</td><td>{{ orderInfo.order_no }}</td>
+    </tr>
+    <tr>
+        <td>商品名称</td><td>{{ productInfo.name }}</td>
+    </tr>
+    <tr>
+        <td>商品分类</td><td>{{ categoryInfo.name }}</td>
+    </tr>
+    <tr>
+        <td>伙购价格</td><td>￥{{ productInfo.price }}</td>
+    </tr>
+    <tr>
+        <td>会员名</td><td>{% if userInfo.phone and userInfo.email %}{{ userInfo.phone }}  {{ userInfo.email }}{% else %}{{ userInfo.phone|default(userInfo.email) }}{% endif %}</td>
+    </tr>
+    <tr>
+        <td>状态</td><td>{% if shareTopicInfo.is_pass == 0 %}待审核</a>{% elseif shareTopicInfo.is_pass == 1 %}完成{% elseif shareTopicInfo.is_pass == 2 %}未通过{% endif %}</td>
+    </tr>
+    {% if shareTopicInfo.is_pass == 2 %}
+    <tr>
+        <td>原因</td><td>{{ shareTopicInfo.note }}</td>
+    </tr>
+    {% endif %}
+    <tr>
+        <td>晒单时间</td><td>{{ shareTopicInfo.created_at|date('Y-m-d H:i:s') }}</td>
+    </tr>
+    {% if shareTopicInfo.is_pass != 0 %}
+    <tr>
+        <td>是否显示</td><td>{% if shareTopicInfo.is_show == 1 %}是{% else %}否{% endif %}</td>
+    </tr>
+    <tr>
+        <td>审核人</td><td>{{ admin }}</td>
+    </tr>
+    <tr>
+        <td>审核时间</td><td>{{ shareTopicInfo.checked_at|date('Y-m-d H:i:s') }}</td>
+    </tr>
+    {% endif %}
+    <!--<tr><td colspan="2"><hr/></td></tr>-->
+    <!--<tr>-->
+        <!--<td>晒单图片</td>-->
+        <!--<td style="width: 650px">-->
+            <!--{% for pic in pictures %}-->
+            <!--<div style=" display: inline-block; padding-bottom: 30px; position: relative;">-->
+                <!--<img src="{{ pic.url }}" class="picture" style="width: 200px; display:inline-block" share_topic_id="{{ shareTopicInfo.id }}" basename="{{ pic.basename }}">-->
+                <!--<span style="position: absolute; left:80px; bottom:12px;">-->
+                <!--{% if pic.main == 1 %}主图{% endif %}-->
+                <!--{% if pic.roll == 1 %} 滚动图{% endif %}-->
+                <!--{% if pic.recommend == 1 %} 推荐图{% endif %}-->
+                <!--</span>-->
+            <!--</div>-->
+            <!--{% endfor %}-->
+        <!--</td>-->
+    <!--</tr>-->
+    <!--<tr>-->
+        <!--&lt;!&ndash;<td rowspan="{{ pictures_num }}">晒单图片</td>&ndash;&gt;-->
+        <!--<td rowspan="2">晒单图片</td>-->
+    <!--</tr>-->
+    <tr class="tsTr">
+        <td style="padding-top: 100px;">晒单图片</td>
+    {% for pic in pictures %}
+        <td>
+            <div style=" display: inline-block; padding-bottom: 30px; position: relative;">
+                <img src="{{ pic.url }}" class="picture" width="100%" style="display:inline-block" share_topic_id="{{ shareTopicInfo.id }}" basename="{{ pic.basename }}">
+                <span style="position: absolute; left:80px; bottom:12px;">
+                {% if pic.main == 1 %}主图{% endif %}
+                {% if pic.roll == 1 %} 滚动图{% endif %}
+                {% if pic.recommend == 1 %} 推荐图{% endif %}
+                </span>
+            </div>
+            <p><span>排序：</span><input style="width: 50px;" class="easyui-numberbox" type="text" name="Pic[{{ pic.basename }}][order]" data-options="min:0,precision:0,required:true" value="{{ pic.order }}"><input name="Pic[{{ pic.basename }}][is_show]" type="radio" class="easyui-validatebox" {% if pic.is_show == 1 %}checked{% endif %} value="1" onclick="showPic('{{ pic.basename }}', 1)"><span>显示</span><input name="Pic[{{ pic.basename }}][is_show]" type="radio" class="easyui-validatebox" {% if pic.is_show == 0 %}checked{% endif %} value="0" onclick="showPic('{{ pic.basename }}', 0)"><span>隐藏</span></p>
+        </td>
+    {% endfor %}
+    </tr>
+    <tr>
+        <td>获奖感言</td><td>{{ shareTopicInfo.content }}</td>
+    </tr>
+    {% if shareTopicInfo.is_pass != 1 %}
+    <tr>
+        <td>审核</td>
+        <td>
+            <input name="is_pass" type="radio" class="easyui-validatebox" checked value="1">通过
+            <input name="is_pass" type="radio" class="easyui-validatebox" value="2" {% if shareTopicInfo.is_pass == 2 %}disabled{% endif %}>驳回
+        </td>
+    </tr>
+    <tr class="pass">
+        <td>奖励积分</td>
+        <td>
+            <select class="easyui-combobox" name="point" data-options="panelHeight:'auto', required:true">
+                <option value="400">400</option>
+                <option value="500">500</option>
+                <option value="600">600</option>
+                <option value="700">700</option>
+                <option value="800">800</option>
+                <option value="900">900</option>
+                <option value="1000">1000</option>
+                <option value="1100">1100</option>
+                <option value="1200">1200</option>
+                <option value="1300">1300</option>
+                <option value="1400">1400</option>
+                <option value="1500">1500</option>
+            </select>
+        </td>
+    </tr>
+    <tr class="pass">
+        <td>推荐</td>
+        <td>
+            <input name="is_recommend" type="radio" class="easyui-validatebox" checked value="0">否
+            <input name="is_recommend" type="radio" class="easyui-validatebox" value="1">是
+        </td>
+    </tr>
+    <tr class="pass">
+        <td>精华</td>
+        <td>
+            <input name="is_digest" type="radio" class="easyui-validatebox" checked value="0">否
+            <input name="is_digest" type="radio" class="easyui-validatebox" value="1">是
+        </td>
+    </tr>
+    <tr class="pass">
+        <td>是否显示</td>
+        <td>
+            <input name="is_show" type="radio" class="easyui-validatebox" value="0">否
+            <input name="is_show" type="radio" class="easyui-validatebox" checked value="1">是
+        </td>
+    </tr>
+    <tr class="no_pass">
+        <td>拒绝原因</td>
+        <td>
+            <select class="easyui-combobox" data-options="panelHeight:'auto', onSelect: noteOnselect, required:true">
+                <option value="图片不清晰">图片不清晰</option>
+                <option value="获奖感言与获奖商品不一致">获奖感言与获奖商品不一致</option>
+                <option value="图片与获奖商品不一致">图片与获奖商品不一致</option>
+                <option value="其他">其他</option>
+            </select>
+        </td>
+    </tr>
+    <tr class="other">
+        <td></td>
+        <td>
+            <input class="easyui-textbox" type="text" id="note" name="note" data-options="required:true" value="图片不清晰">
+        </td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td>
+            <a style="margin-right: 20px;" href="javascript:void(0)" class="easyui-linkbutton" onclick="submitForm()">确定</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" onclick="clearForm()">取消</a>
+        </td>
+    </tr>
+    {% endif %}
+</table>
+{{ html.endForm() | raw }}
+
+<div id="dlg-edit" class="easyui-window" title="编辑图片" style="width:650px;height:700px;padding:10px;overflow:hidden;" data-options="
+            iconCls:'icon-save',
+            closed:true,
+            modal:true,
+            onClose: onClose,
+            onResize:function(){
+                $(this).window('hcenter');
+            }">
+    <iframe width="100%" height="100%" frameborder="0" id="edit_iframe"></iframe>
+</div>
+
+{% endblock %}
+
+{% block js %}
+<script>
+    $(function() {
+        $('.no_pass').hide();
+        $('.other').hide();
+
+        $("input:radio[name='is_pass']").change(function () {
+            if ($(this).val() == 1) {
+                $('.pass').show();
+                $('.no_pass').hide();
+                $('.other').hide();
+            } else {
+                $('.pass').hide();
+                $('.no_pass').show();
+                $('.other').hide();
+            }
+        });
+
+        $('img').on('click', function() {
+            $('#edit_iframe').prop('src', "{{ url('share/show-picture') }}" + '?id=' + $(this).attr('share_topic_id') + '&basename=' + $(this).attr('basename'));
+            $('#dlg-edit').window('open');
+        });
+    })
+
+    function noteOnselect(newValue, oldValue) {
+        if (newValue.value == '其他') {
+            $('.other').show();
+            $('#note').textbox('setValue', '');
+        } else {
+            $('.other').hide();
+            $('#note').textbox('setValue', newValue.value);
+        }
+    }
+
+    function submitForm() {
+        $('#detailForm').form({
+            url: '/share/view?id=' + "{{ shareTopicInfo.id }}",
+            onSubmit:function(){
+                result = $(this).form('enableValidation').form('validate');
+            },
+            success: function (data) {
+                data = eval('(' + data + ')');
+                if (data.error == 0) {
+                    $.messager.alert('成功', data.message);
+                    setTimeout(function(){
+                        window.parent.window.reloadgrid();
+                        window.parent.window.closeDigView();
+                    }, 1000);
+                } else {
+                    $.messager.alert('失败', data.message, 'error');
+                }
+            }
+        });
+        $('#detailForm').submit();
+    }
+
+    function onClose() {
+        $('#edit_iframe').prop('src', '');
+        window.parent.window.reloadgrid();
+    }
+
+    function showPic(basename, is_show) {
+        if (basename) {
+            $.get("{{ url('share/show-pic') }}", {'is_show':is_show, 'basename':basename}, function(data) {
+            }, 'json');
+        }
+    }
+</script>
+{% endblock %}
+

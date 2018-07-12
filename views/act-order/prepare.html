@@ -1,0 +1,106 @@
+<link rel="stylesheet" type="text/css" href="{{ app.params.skinUrl }}/js/jquery-easyui-1.4.4/themes/default/easyui.css">
+<link rel="stylesheet" type="text/css" href="{{ app.params.skinUrl }}/js/jquery-easyui-1.4.4/themes/icon.css">
+
+<script src="{{ app.params.skinUrl }}/js/jquery-easyui-1.4.4/jquery.min.js" type="text/javascript"></script>
+<script src="{{ app.params.skinUrl }}/js/jquery-easyui-1.4.4/jquery.easyui.min.js" type="text/javascript"></script>
+<script src="{{ app.params.skinUrl }}/js/jquery-easyui-1.4.4/locale/easyui-lang-zh_CN.js" type="text/javascript"></script>
+<script src="{{ app.params.skinUrl }}/js/order-detail.js" type="text/javascript"></script>
+
+<div title="Basic Window"  style="padding:5px;height:auto;width:100%" class="box">
+    {% if(model.status == 2) %}
+    {{ html.beginForm('', 'post', {'class':'am-form am-form-horizontal', 'id':'deliver-form'}) | raw }}
+    <table cellpadding="10" style="font-size: 13px;">
+        <tr>
+            <td>发货方式</td>
+            <td>
+                <select name="ActDeliver[send]">
+                    <option value="1">第三方平台</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>选择平台</td>
+            <td>
+                <select name="ActDeliver[platform]" class="easyui-combobox" data-options="panelHeight:'auto'" id="platform">
+                    <option value="京东">京东</option>
+                    <option value="苏宁">苏宁</option>
+                    <option value="天猫">天猫</option>
+                    <option value="亚马逊">亚马逊</option>
+                    <option value="国美">国美</option>
+                    <option value="一号店">一号店</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>支付方式</td>
+            <td>
+                <select name="ActDeliver[payment]" class="easyui-combobox" id="payment" data-options="panelHeight:'auto'">
+                    <option value="无">无</option>
+                    <option value="京东">京东</option>
+                    <option value="支付宝">支付宝</option>
+                    <option value="其他">其他</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>第三方订单号</td>
+            <td><input class="easyui-textbox" type="text" name="ActDeliver[third_order]" data-options="required:true"></td>
+        </tr>
+        <tr>
+            <td>成本</td>
+            <td><input class="easyui-textbox" type="text" name="ActDeliver[price]" data-options="required:true,"></td>
+        </tr>
+        <tr>
+            <td>规格</td>
+            <td><input class="easyui-textbox" type="text" name="ActDeliver[standard]" ></td>
+        </tr>
+        <tr>
+            <td>发票</td>
+            <td>
+                <select name="ActDeliver[bill]" class="easyui-combobox" id="bill" data-options="panelHeight:'auto'">
+                    <option value="无">无</option>
+                    <option value="普通发票">普通发票</option>
+                    <option value="专业发票">专业发票</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>发票编号</td>
+            <td><input class="easyui-textbox" type="text" name="ActDeliver[bill_num]" ></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>
+                <input type="submit" class="easyui-linkbutton">
+            </td>
+        </tr>
+    </table>
+    {{ html.endForm() | raw }}
+    {% endif %}
+</div>
+
+<script>
+    var form = 'deliver-form';
+    var id = "{{ model.id }}";
+    var url = '/act-order/prepare?id='+id;
+
+    $('#' + form).form({
+        url: url,
+        onSubmit:function(){
+            return $(this).form('enableValidation').form('validate');
+        },
+        success: function (data) {
+            var data = eval('('+data+')');
+            if (data.error == 0) {
+                $.messager.alert('成功', data.message);
+                setTimeout(function(){
+                    parent.closeWindow('deliver');
+                    parent.parent.reloadgrid();
+                }, 1000);
+            } else {
+                $.messager.alert('失败', data.message, 'error');
+            }
+        }
+    });
+    $('#' + form).submit();
+</script>

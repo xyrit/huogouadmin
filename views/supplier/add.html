@@ -1,0 +1,104 @@
+{% extends '@app/views/base.html' %}
+
+{% block main %}
+<div style="padding:10px 60px 20px 60px">
+    {{ html.beginForm('', 'post', {'id':'supplier_form'}) | raw }}
+    <table cellpadding="5">
+        <tr>
+            <td>供应商名称</td>
+            <td><input class="easyui-textbox" type="text" name="Supplier[name]" data-options="required:true" /></td>
+        </tr>
+        <tr>
+            <td>联系人</td>
+            <td><input class="easyui-textbox" type="text" name="Supplier[contact]" data-options="required:true" /></td>
+        </tr>
+        <tr>
+            <td>联系方式</td>
+            <td><input class="easyui-textbox" type="text" name="Supplier[contact_way]" data-options="required:true" /></td>
+        </tr>
+        <tr>
+            <td>详细地址</td>
+            <td><input class="easyui-textbox" type="text" name="Supplier[address]" data-options="required:true" /></td>
+        </tr>
+        <tr>
+            <td>添加商品</td>
+            <td><a class="easyui-linkbutton" data-options="iconCls:'icon-add'" onclick="addProduct()">添加商品</a></td>
+        </tr>
+    </table>
+    <table id="product_list" style="margin-top: 20px; margin-bottom: 20px">
+        <thead>
+        <tr>
+            <th style="width: 100px">商品编码</th>
+            <th style="width: 500px;">商品名称</th>
+            <th style="width: 150px;">采购价</th>
+            <th style="width: 80px"></th>
+        </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    {{ html.endForm() | raw }}
+    <a href="javascript:void(0)" class="easyui-linkbutton" onclick="submitForm()" style="width: 80px;">确定</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" onclick="clearForm()" style="width: 80px;">取消</a>
+</div>
+
+<div id="dlg-show-product" class="easyui-window" title="商品列表" style="width:400px;height:200px;padding:10px;overflow:hidden;" data-options="
+            iconCls:'icon-save',
+            closed:true,
+            modal:true,
+            onResize:function(){
+                $(this).window('hcenter');
+            }">
+    <select class="easyui-combobox" id="product" editable="true" style="width:350px;"></select>
+</div>
+
+{% endblock %}
+
+{% block script %}
+<script>
+    function submitForm() {
+        $('#supplier_form').form({
+            url: "{{ url('supplier/add') }}",
+            onSubmit:function() {
+                return $(this).form('enableValidation').form('validate');
+            },
+            success: function (data) {
+                var data = eval('('+data+')');
+                if (data.error == 0) {
+                    $.messager.alert('成功', data.message);
+                    parent.location.reload();
+                } else {
+                    $.messager.alert('失败', data.message, 'error');
+                }
+            }
+        });
+        $('#supplier_form').submit();
+    }
+
+    function addProduct() {
+        $('#product').combobox({
+            url:"{{ url('product/list') }}",
+            method:'get',
+            valueField: 'id',
+            textField: 'name',
+            onSelect: function(record) {
+                if ($('input[name="Product[]['+record.id+']"]').length > 0) {
+                    $.messager.alert('失败', '商品已存在', 'error');
+                    return false;
+                }
+                $('#dlg-show-product').window('close');
+                tr = '<tr><td align="center">'+record.id+'</td><td align="center">'+record.name+'</td>';
+                tr += '<td align="center"><input class="easyui-textbox" type="text" name="Product['+record.id+']" data-options="required:true" /></td>';
+                tr += '<td align="center"><a href="javascript:void(0)" class="easyui-linkbutton" onclick="del(this)">删除</a><td>';
+                tr += '</tr>';
+                $.parser.parse($(tr).appendTo('#product_list'));
+            }
+        });
+        $('#dlg-show-product').window('open');
+    }
+
+    function del(obj) {
+        $(obj).parent().parent().remove();
+    }
+</script>
+{% endblock %}

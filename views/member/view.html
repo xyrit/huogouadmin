@@ -1,0 +1,163 @@
+{% extends '@app/views/base.html' %}
+
+{% block main %}
+<style type="text/css">
+    td {
+        padding-left: 20px
+    }
+</style>
+<table cellpadding="5">
+    <tr>
+        <td>会员ID：{{ userInfo.id }}</td>
+        <td>消费总额：￥{{ userInfo.totalPayment|default(0) }}</td>
+        <td>个人主页-伙购记录：{% if(limit.id) %}{% if(limit.ucenter_buylist == 1) %}全部 ({{ limit.buylist_number|default('所有')
+            }}){% elseif(limit.ucenter_buylist == 2) %}好友可见{% else %}自己可见{% endif %}{% else %}全部{% endif %}
+        </td>
+    </tr>
+    <tr>
+        <td>用户名：{% if userInfo.email and userInfo.phone %}{{ userInfo.phone }} {{ userInfo.email }}{% else %}{{
+            userInfo.phone|default(userInfo.email) }}{% endif %}
+        </td>
+        <td>账户总额：￥{{ userInfo.money|default(0) }}</td>
+        <td>个人主页-获得商品：{% if(limit.id) %}{% if(limit.ucenter_orderlist == 1) %}全部 ({{
+            limit.orderlist_number|default('所有') }}){% elseif(limit.ucenter_orderlist == 2) %}好友可见{% else %}自己可见{% endif
+            %}{% else %}全部{% endif %}
+        </td>
+    </tr>
+    <tr>
+        <td>昵称：{{ userInfo.nickname|default('空') }}</td>
+        <td>转出总额：￥{{ userInfo.outTotal|default(0) }}</td>
+        <td>个人主页-晒单记录：{% if(limit.id) %}{% if(limit.ucenter_sharelist == 1) %}全部 ({{
+            limit.sharelist_number|default('所有') }}){% elseif(limit.ucenter_sharelist == 2) %}好友可见{% else %}自己可见{% endif
+            %}{% else %}全部{% endif %}
+        </td>
+    </tr>
+    <tr>
+        <td>性别：{% if userInfo.sex == 1 %}男{% elseif userInfo.sex == 2 %}女{% else %}保密{% endif %}</td>
+        <td>转入总额：￥{{ userInfo.inTotal|default(0) }}</td>
+        <td>个性签名：{{ userInfo.intro|default('空') }}</td>
+    </tr>
+    <tr>
+        <td>经验：{{ userInfo.experience|default(0) }}</td>
+        <td>佣金余额：￥{{ userInfo.commission / 100|number_format(2) }}</td>
+        <td>好友搜索：{% if(limit.friend_search == 1 or userInfo.limit.id is null) %}允许{% else %}禁止{% endif %}</td>
+    </tr>
+    <tr>
+        <td>邀请人：{{ userInfo.invite }}</td>
+        <td>福分：{{ userInfo.point|default(0) }}</td>
+        <td>私信：{% if(limit.private_letter == 2 or limit.id is null) %}仅限好友{% else %}禁止{% endif %}</td>
+    </tr>
+    <tr>
+        <td>手机：{{ userInfo.phone|default('空') }}</td>
+        <td>地理位置：{% if(limit.position == 1 or userInfo.limit.id is null) %}允许{% else %}禁止{% endif %}</td>
+        <td>接收系统消息：{% if(notice.id is null or notice.receive_sysinfo == 1) %}允许{% else %}禁止{% endif %}</td>
+    </tr>
+    <tr>
+        <td>QQ号：{{ userInfo.qq|default('空') }}</td>
+        <td>注册时间：{{ userInfo.created_at|date('Y-m-d H:i:s') }}</td>
+        <td>接收微信或邮件消息：{% if(notice.id is null or notice.receive_wchat == 1) %}允许{% else %}禁止{% endif %}</td>
+    </tr>
+    <tr>
+        <td>微信昵称：{{ userInfo.wx|default('空') }}</td>
+        <td>注册IP：{{ userInfo.reg_ip|default('空') }}</td>
+        <td>首次充值：￥{{ userInfo.firstRecharge|default(0) }}</td>
+    </tr>
+    <tr>
+        <td>邮箱：{{ userInfo.email|default('空') }}</td>
+        <td>最后登录时间：{{ userInfo.updated_at|date('Y-m-d H:i:s') }}</td>
+        <td>截至当前累计充值：￥{{ userInfo.totalRecharge|default(0) }}</td>
+    </tr>
+    <tr>
+        <td>现居住地：{{ userInfo.live_city|default('空') }}</td>
+        <td>最后登录IP：{{ userInfo.last_login_ip }}</td>
+        <td>截至当前累计消费：￥{{ userInfo.totalPayment|default(0) }}</td>
+    </tr>
+</table>
+<div class="easyui-tabs" style="padding:10px;height: 400px;" id="view_tabs">
+    <div title="伙购记录" style="padding:10px;">
+        <iframe width="100%" height="90%" frameborder="0" id="buylist_iframe"></iframe>
+    </div>
+    <div title="中奖记录" style="padding:10px;">
+        <iframe width="100%" height="100%" frameborder="0" id="winning_iframe"></iframe>
+    </div>
+    <div title="晒单记录" style="padding:10px;">
+        <iframe width="100%" height="100%" frameborder="0" id="share_iframe"></iframe>
+    </div>
+    <div title="账户明细" style="padding:10px;">
+        <iframe width="100%" height="100%" frameborder="0" id="money_iframe"></iframe>
+    </div>
+    <div title="佣金明细" style="padding:10px;">
+        <iframe width="100%" height="100%" frameborder="0" id="commission_iframe"></iframe>
+    </div>
+    <div title="福分明细" style="padding:10px;">
+        <iframe width="100%" height="100%" frameborder="0" id="point_iframe"></iframe>
+    </div>
+    <div title="邀请列表" style="padding:10px;">
+        <iframe width="100%" height="100%" frameborder="0" id="invite_iframe"></iframe>
+    </div>
+    <div title="好友列表" style="padding:10px;">
+        <iframe width="100%" height="100%" frameborder="0" id="friend_iframe"></iframe>
+    </div>
+    <div title="收货地址" style="padding:10px;">
+        <iframe width="100%" height="100%" frameborder="0" id="address_iframe"></iframe>
+    </div>
+    <div title="圈子" style="padding:10px;">
+        <iframe width="100%" height="100%" frameborder="0" id="group_iframe"></iframe>
+    </div>
+    <div title="话题" style="padding:10px;">
+        <iframe width="100%" height="100%" frameborder="0" id="topic_iframe"></iframe>
+    </div>
+    <div title="消息" style="padding:10px;">
+        <iframe width="100%" height="100%" frameborder="0" id="message_iframe"></iframe>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+    $('#view_tabs').tabs({
+        onSelect: function (title, index) {
+            switch (title) {
+                case '伙购记录':
+                    $('#buylist_iframe').prop('src', "{{ url('member/buy', {'id': userInfo.id}) }}");
+                    break;
+                case '中奖记录':
+                    $('#winning_iframe').prop('src', "{{ url('member/winning', {'id': userInfo.id}) }}");
+                    break;
+                case '晒单记录':
+                    $('#share_iframe').prop('src', "{{ url('member/share', {'id': userInfo.id}) }}");
+                    break;
+                case '账户明细':
+                    $('#money_iframe').prop('src', "{{ url('member/money', {'id': userInfo.id}) }}");
+                    break;
+                case '佣金明细':
+                    $('#commission_iframe').prop('src', "{{ url('member/commission', {'id': userInfo.id}) }}");
+                    break;
+                case '福分明细':
+                    $('#point_iframe').prop('src', "{{ url('member/point', {'id': userInfo.id}) }}");
+                    break;
+                case '邀请列表':
+                    $('#invite_iframe').prop('src', "{{ url('member/invite', {'id': userInfo.id}) }}");
+                    break;
+                case '好友列表':
+                    $('#friend_iframe').prop('src', "{{ url('member/friend', {'id': userInfo.id}) }}");
+                    break;
+                case '收货地址':
+                    $('#address_iframe').prop('src', "{{ url('member/address', {'id': userInfo.id}) }}");
+                    break;
+                case '圈子':
+                    $('#group_iframe').prop('src', "{{ url('member/group', {'id': userInfo.id}) }}");
+                    break;
+                case '话题':
+                    $('#topic_iframe').prop('src', "{{ url('member/topic', {'id': userInfo.id}) }}");
+                    break;
+                case '消息':
+                    $('#message_iframe').prop('src', "{{ url('member/message', {'id': userInfo.id}) }}");
+                    break;
+            }
+        }
+    });
+    $('#buylist_iframe').prop('src', "{{ url('member/buy', {'id': userInfo.id}) }}");
+    $('#view_tabs').tabs('select', 0);
+</script>
+{% endblock %}

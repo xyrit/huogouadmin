@@ -1,0 +1,67 @@
+{% extends '@app/views/base.html' %}
+
+{% block main %}
+<div>
+    {{ html.beginForm('', 'post', {'class':'am-form am-form-horizontal', 'id':'editForm'}) | raw }}
+    <table cellpadding="5">
+        <tr>
+            <td>qq群</td>
+            <td><input class="easyui-textbox" type="text" name="Qq[num]" value="{{ model.num }}" data-options="required:true"></td>
+        </tr>
+        <tr>
+            <td>安卓key值</td>
+            <td><input class="easyui-textbox" type="text" name="Qq[android_key]" value="{{ model.android_key }}" data-options="required:true"></td>
+        </tr>
+        <tr>
+            <td>ios key值</td>
+            <td><input class="easyui-textbox" type="text" name="Qq[ios_key]" value="{{ model.ios_key }}" data-options="required:true"></td>
+        </tr>
+        <tr>
+            <td>ios uin值</td>
+            <td><input class="easyui-textbox" type="text" name="Qq[uin]"value="{{ model.uin }}" data-options="required:true"></td>
+        </tr>
+        <tr>
+            <td>是否默认</td>
+            <td>
+                <select name="Qq[default]" class="easyui-combobox" id="default" style="width:200px;" data-options="required:true,panelHeight:'auto',editable:false,value:{{model.default}}">
+                    <option value="1">是</option>
+                    <option value="0">否</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>
+                <a class="easyui-linkbutton" onclick="save()">提交</a>
+            </td>
+        </tr>
+    </table>
+    {{ html.endForm() | raw }}
+</div>
+
+{% endblock %}
+
+{% block js %}
+<script>
+    function save(){
+        var form = 'editForm';
+        var url = '/qq/edit?id='+'{{ model.id }}';
+        $('#' + form).form({
+            url: url,
+            onSubmit:function(){
+                return $(this).form('enableValidation').form('validate');
+            },
+            success: function (data) {
+                data = eval('(' + data + ')');
+                if (data.error == 0) {
+                    $.messager.alert('成功', data.message);
+                    setTimeout(function(){parent.location.reload()}, 2000);
+                } else {
+                    $.messager.alert('失败', data.message, 'error');
+                }
+            }
+        });
+        $('#' + form).submit();
+    }
+</script>
+{% endblock %}

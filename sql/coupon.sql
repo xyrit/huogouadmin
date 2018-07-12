@@ -1,0 +1,22 @@
+CREATE TABLE `coupon` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `name` char(50) NOT NULL DEFAULT '' COMMENT '优惠券名称',
+  `icon` varchar(100) DEFAULT NULL COMMENT '图标',
+  `type` int(1) NOT NULL COMMENT '优惠券类型',
+  `amount` char(100) NOT NULL DEFAULT '' COMMENT '金额',
+  `condition` char(200) NOT NULL DEFAULT '' COMMENT '使用条件',
+  `desc` text NOT NULL COMMENT '使用说明',
+  `num` int(10) NOT NULL DEFAULT '0' COMMENT '数量',
+  `receive_limit` int(2) DEFAULT '1' COMMENT '领取限制',
+  `send_num` int(10) DEFAULT '0' COMMENT '发放数量，包含被冻结数量',
+  `left_num` int(10) NOT NULL COMMENT '剩余数量',
+  `use_num` int(10) DEFAULT '0' COMMENT '使用数量',
+  `status` int(1) DEFAULT '0' COMMENT '优惠券状态',
+  `valid_type` int(1) NOT NULL COMMENT '有效期类型',
+  `start_time` int(10) DEFAULT '0' COMMENT '开始使用时间',
+  `end_time` int(10) DEFAULT '0' COMMENT '结束时间',
+  `valid` int(10) NOT NULL DEFAULT '0' COMMENT '有效期',
+  `create_time` int(10) NOT NULL COMMENT '创建时间',
+  `update_time` int(10) NOT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
